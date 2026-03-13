@@ -28,30 +28,26 @@ export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const timelineRef = useRef<TimelineHandle>(null);
-  const activePopup = useRef<mapboxgl.Popup | null>(null);
 
-  const showLocationPopup = useCallback((entry: typeof sortedEntries[number]) => {
-    activePopup.current?.remove();
+  const activeIndicator = useRef<mapboxgl.Marker | null>(null);
+
+  const showLocationIndicator = useCallback((entry: typeof sortedEntries[number]) => {
+    activeIndicator.current?.remove();
     if (!map.current) return;
 
-    const cat = entry.category === "live" ? "LIVE" : entry.category === "queued" ? "QUEUED" : "ARCHIVED";
     const color = entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555" : "#ff8800";
 
-    activePopup.current = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      anchor: "bottom",
-      offset: 15,
-      className: "cyber-popup",
-    })
+    const el = document.createElement("div");
+    el.className = "cyber-reticle";
+    el.innerHTML = `
+      <div class="reticle-ring" style="border-color:${color}"></div>
+      <div class="reticle-ring reticle-ring-2" style="border-color:${color}"></div>
+      <div class="reticle-crosshair" style="background:${color}"></div>
+      <div class="reticle-crosshair reticle-crosshair-v" style="background:${color}"></div>
+    `;
+
+    activeIndicator.current = new mapboxgl.Marker({ element: el, anchor: "center" })
       .setLngLat(entry.coordinates)
-      .setHTML(`
-        <div class="cyber-popup-inner">
-          <span class="cyber-popup-status" style="color:${color}">[${cat}]</span>
-          <span class="cyber-popup-name">${entry.location.toUpperCase()}</span>
-          ${entry.country ? `<span class="cyber-popup-country">${entry.country}</span>` : ""}
-        </div>
-      `)
       .addTo(map.current);
   }, []);
 
@@ -78,24 +74,27 @@ export default function AboutPage() {
             type: "background",
             paint: { "background-color": "#000000" },
           },
-          // Water
+          // Ocean/sea only (no lakes/rivers)
           {
             id: "water",
             type: "fill",
             source: "mapbox-streets",
             "source-layer": "water",
-            paint: { "fill-color": "#0a0a0a" },
+            filter: ["!", ["coalesce", ["get", "class"], false]],
+            paint: { "fill-color": "transparent" },
           },
-          // Waterways
+          // Coastlines (ocean only)
           {
-            id: "waterway",
+            id: "water-outline",
             type: "line",
             source: "mapbox-streets",
-            "source-layer": "waterway",
+            "source-layer": "water",
+            filter: ["!", ["coalesce", ["get", "class"], false]],
             paint: {
-              "line-color": "#151515",
-              "line-width": 1,
-              "line-opacity": 0.4,
+              "line-color": "#00ff66",
+              "line-width": 0.6,
+              "line-opacity": 0.25,
+              "line-dasharray": [4, 3],
             },
           },
           // Country boundaries
@@ -106,9 +105,10 @@ export default function AboutPage() {
             "source-layer": "admin",
             filter: ["==", ["get", "admin_level"], 0],
             paint: {
-              "line-color": "#ffffff",
-              "line-width": 0.8,
-              "line-opacity": 0.2,
+              "line-color": "#00ff66",
+              "line-width": 0.7,
+              "line-opacity": 0.3,
+              "line-dasharray": [6, 4],
             },
           },
           // State/province boundaries
@@ -119,9 +119,10 @@ export default function AboutPage() {
             "source-layer": "admin",
             filter: ["==", ["get", "admin_level"], 1],
             paint: {
-              "line-color": "#ffffff",
+              "line-color": "#00ff66",
               "line-width": 0.3,
-              "line-opacity": 0.1,
+              "line-opacity": 0.12,
+              "line-dasharray": [3, 3],
             },
           },
         ],
@@ -162,7 +163,7 @@ export default function AboutPage() {
           zoom: 5,
           duration: 1200,
         });
-        showLocationPopup(entry);
+        showLocationIndicator(entry);
       });
 
       new mapboxgl.Marker(el)
@@ -189,7 +190,7 @@ export default function AboutPage() {
         zoom: 5,
         duration: 2000,
       });
-      showLocationPopup(liveEntry);
+      showLocationIndicator(liveEntry);
     }, 800);
 
     return () => clearTimeout(timer);
@@ -201,8 +202,8 @@ export default function AboutPage() {
       zoom: 5,
       duration: 1200,
     });
-    showLocationPopup(entry);
-  }, [showLocationPopup]);
+    showLocationIndicator(entry);
+  }, [showLocationIndicator]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-dark cyber-grid">
@@ -249,19 +250,19 @@ export default function AboutPage() {
       </div>
 
       {/* Main content — fills remaining space */}
-      <div className="flex-1 flex min-h-0">
-        <div className="mx-auto max-w-7xl w-full px-6 flex flex-col md:flex-row gap-6 py-4">
-          {/* Timeline panel — scrollable */}
-          <div className="md:w-1/2 lg:w-3/5 overflow-y-auto min-h-0 pr-4 scrollbar-thin">
+      <div className="flex-1 relative min-h-0">
+        {/* Map — constrained to max-w-7xl, behind content */}
+        <div className="absolute inset-0 z-0 flex justify-center">
+          <div className="w-full max-w-7xl px-6">
+            <div className="h-full" ref={mapContainer} />
+          </div>
+        </div>
+
+        {/* Timeline panel — scrolls over the map */}
+        <div className="relative z-10 h-full mx-auto max-w-7xl px-6 py-4">
+          <div className="md:w-1/2 lg:w-3/5 h-full overflow-y-auto pr-4 scrollbar-thin">
             <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
             <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
-          </div>
-
-          {/* Map panel — fixed, fills height */}
-          <div className="md:w-1/2 lg:w-2/5 min-h-0">
-            <div className="h-full overflow-hidden">
-              <div ref={mapContainer} className="w-full h-full" />
-            </div>
           </div>
         </div>
       </div>

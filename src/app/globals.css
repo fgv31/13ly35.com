@@ -224,42 +224,59 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Cyberpunk map popup */
-.cyber-popup .mapboxgl-popup-content {
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0;
-  padding: 0;
-  box-shadow: 0 0 12px rgba(0, 255, 102, 0.15), inset 0 0 12px rgba(0, 0, 0, 0.5);
+/* Cyberpunk reticle indicator */
+.cyber-reticle {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  pointer-events: none;
 }
 
-.cyber-popup .mapboxgl-popup-tip {
-  border-top-color: rgba(255, 255, 255, 0.15);
+.reticle-ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: reticleExpand 1.5s ease-out infinite;
 }
 
-.cyber-popup-inner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  font-family: var(--font-mono), monospace;
+.reticle-ring-2 {
+  inset: 6px;
+  animation: reticleSpin 4s linear infinite;
+  border-style: dashed;
+  opacity: 0.5;
 }
 
-.cyber-popup-status {
-  font-size: 9px;
-  font-weight: bold;
+.reticle-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  opacity: 0.4;
+  transform: translateY(-0.5px);
 }
 
-.cyber-popup-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 0.05em;
+.reticle-crosshair-v {
+  top: 4px;
+  bottom: 4px;
+  left: 50%;
+  right: auto;
+  width: 1px;
+  height: auto;
+  transform: translateX(-0.5px);
 }
 
-.cyber-popup-country {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.3);
+@keyframes reticleExpand {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  50% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(0.6); opacity: 0.9; }
+}
+
+@keyframes reticleSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Hide Mapbox branding */
