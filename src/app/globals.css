@@ -21,17 +21,37 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Pixel accent utilities */
-.pixel-hover {
-  transition: all 0.1s steps(3);
+/* Clean hover effect - Valiente style */
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.4s ease;
 }
 
-.pixel-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 2px 2px 0 var(--accent);
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Smooth link underline animation */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.link-underline:hover::after {
+  width: 100%;
 }
 
 /* Selection styling */
@@ -39,3 +59,26 @@ body {
   background: var(--accent);
   color: var(--background);
 }
+
+/* Smooth page transitions */
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animation delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }

@@ -8,118 +8,116 @@ const navigationCards = [
   {
     title: "About",
     href: "/about",
-    description: "Who I am and what I do",
-    emoji: "👤",
+    description: "History, experiences, and the journey so far",
+    number: "01",
   },
   {
     title: "Map",
     href: "/map",
-    description: "Places I've been and want to go",
-    emoji: "🗺️",
+    description: "Places explored and destinations ahead",
+    number: "02",
   },
   {
     title: "Taste",
     href: "/taste",
-    description: "Music, books, and things I love",
-    emoji: "✨",
+    description: "Curated recommendations across media and objects",
+    number: "03",
   },
   {
     title: "Projects",
     href: "/projects",
-    description: "Things I've built and am building",
-    emoji: "🛠️",
+    description: "Ideas built, building, and imagined",
+    number: "04",
   },
   {
     title: "Now",
     href: "/now",
-    description: "What I'm up to right now",
-    emoji: "📍",
+    description: "Current focus and weekly reflections",
+    number: "05",
   },
 ];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-beige">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         {/* Hero Section */}
-        <section className="relative overflow-hidden border-b border-black/5 bg-beige px-6 py-24 md:py-32">
+        <section className="px-6 py-32 md:py-48">
           <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col items-center justify-center text-center">
+            <div className="max-w-4xl">
               {/* Main Title */}
-              <h1 className="font-pixel text-4xl tracking-wider text-black md:text-6xl lg:text-7xl">
-                13LY35
+              <h1 className="text-[clamp(3rem,10vw,8rem)] font-light leading-[0.9] tracking-tight text-black">
+                Creative
+                <br />
+                <span className="text-red">Expression</span>
               </h1>
 
               {/* Tagline */}
-              <p className="mt-8 max-w-2xl text-lg text-black/70 md:text-xl">
-                Creative expression meets professional presence.
-                <br />
-                Building digital experiences and exploring the world.
+              <p className="mt-12 max-w-lg text-lg text-black/60 leading-relaxed">
+                Building digital experiences, exploring the world, and documenting the journey along the way.
               </p>
 
-              {/* Accent Line */}
-              <div className="mt-8 h-1 w-24 bg-red"></div>
+              {/* CTA */}
+              <div className="mt-12 flex items-center gap-8">
+                <Link
+                  href="/about"
+                  className="group inline-flex items-center gap-3 text-sm font-medium text-black"
+                >
+                  <span>Explore</span>
+                  <svg
+                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              </div>
             </div>
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="pointer-events-none absolute left-0 top-0 h-full w-full">
-            <div className="absolute left-1/4 top-1/4 h-2 w-2 bg-red opacity-20"></div>
-            <div className="absolute right-1/3 top-1/3 h-2 w-2 bg-red opacity-20"></div>
-            <div className="absolute bottom-1/4 right-1/4 h-2 w-2 bg-red opacity-20"></div>
           </div>
         </section>
 
         {/* Navigation Cards Grid */}
-        <section className="px-6 py-24">
+        <section className="px-6 py-24 border-t border-black/5">
           <div className="mx-auto max-w-7xl">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-px bg-black/5 sm:grid-cols-2 lg:grid-cols-3">
               {navigationCards.map((card, index) => (
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="pixel-hover group relative flex flex-col rounded-lg border-2 border-black bg-beige p-8 transition-all"
+                  className="group relative bg-beige p-10 transition-colors duration-500 hover:bg-black"
                   style={{
-                    animationDelay: `${index * 50}ms`,
-                    animation: "fadeInUp 0.6s ease-out forwards",
                     opacity: 0,
+                    animation: `fadeIn 0.6s ease-out ${index * 0.1}s forwards`,
                   }}
                 >
-                  {/* Card Number */}
-                  <span className="absolute right-4 top-4 font-pixel text-xs text-black/20">
-                    0{index + 1}
-                  </span>
-
-                  {/* Emoji */}
-                  <span className="mb-4 text-4xl" aria-hidden="true">
-                    {card.emoji}
+                  {/* Number */}
+                  <span className="text-xs text-black/20 group-hover:text-white/30 transition-colors duration-500">
+                    {card.number}
                   </span>
 
                   {/* Title */}
-                  <h2 className="mb-2 font-pixel text-lg tracking-wide text-black">
+                  <h2 className="mt-8 text-2xl font-light text-black group-hover:text-white transition-colors duration-500">
                     {card.title}
                   </h2>
 
                   {/* Description */}
-                  <p className="text-sm text-black/70">{card.description}</p>
+                  <p className="mt-3 text-sm text-black/50 group-hover:text-white/60 transition-colors duration-500">
+                    {card.description}
+                  </p>
 
-                  {/* Arrow Indicator */}
-                  <div className="mt-4 flex items-center gap-2 text-red opacity-0 transition-opacity group-hover:opacity-100">
-                    <span className="text-sm font-medium">Explore</span>
+                  {/* Arrow */}
+                  <div className="mt-8 flex items-center gap-2">
                     <svg
-                      className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      className="w-4 h-4 text-red opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                   </div>
                 </Link>
@@ -129,42 +127,35 @@ export default function Home() {
         </section>
 
         {/* Bottom CTA Section */}
-        <section className="border-t border-black/5 bg-beige px-6 py-16">
-          <div className="mx-auto max-w-7xl text-center">
-            <h2 className="font-pixel text-2xl tracking-wide text-black md:text-3xl">
-              Let&apos;s Connect
-            </h2>
-            <p className="mt-4 text-black/70">
-              Always open to interesting conversations and collaborations.
-            </p>
-            <a
-              href="mailto:hello@13ly35.com"
-              className="mt-8 inline-flex items-center gap-2 rounded-lg border-2 border-black bg-beige px-8 py-4 font-medium text-black transition-all hover:bg-black hover:text-beige"
-            >
-              Get in Touch
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        <section className="px-6 py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-light text-black">
+                  Let&apos;s connect
+                </h2>
+                <p className="mt-4 text-black/50 max-w-md">
+                  Open to conversations, collaborations, and new opportunities.
+                </p>
+              </div>
+              <a
+                href="mailto:hello@13ly35.com"
+                className="inline-flex items-center gap-3 text-sm font-medium text-black border-b border-black pb-1 hover:text-red hover:border-red transition-colors duration-300"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </a>
+                hello@13ly35.com
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
           </div>
         </section>
       </main>
 
       <Footer />
 
-      {/* Keyframes for card animations */}
       <style jsx>{`
-        @keyframes fadeInUp {
+        @keyframes fadeIn {
           from {
             opacity: 0;
             transform: translateY(20px);

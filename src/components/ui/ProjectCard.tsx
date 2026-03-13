@@ -1,9 +1,9 @@
 import type { Project, ProjectStatus } from "@/data/mock/projects";
 
-const statusColors: Record<ProjectStatus, string> = {
-  idea: "bg-gray-400 text-black",
-  built: "bg-green-500 text-white",
-  ongoing: "bg-red text-white",
+const statusStyles: Record<ProjectStatus, string> = {
+  idea: "text-black/40",
+  built: "text-green-600",
+  ongoing: "text-red",
 };
 
 interface ProjectCardProps {
@@ -12,55 +12,56 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <div className="pixel-hover border-2 border-black bg-beige p-6 rounded-lg">
+    <div className="group p-8 bg-white/50 hover:bg-white transition-all duration-300">
       <div className="flex items-start justify-between gap-4 mb-4">
-        <h3 className="font-pixel text-sm text-black leading-relaxed">
-          {project.title}
-        </h3>
-        <span
-          className={`${statusColors[project.status]} px-3 py-1 text-xs font-pixel rounded-full whitespace-nowrap`}
-        >
+        <span className={`text-xs uppercase tracking-[0.15em] ${statusStyles[project.status]}`}>
           {project.status}
         </span>
       </div>
 
-      <p className="text-black mb-4 text-base leading-relaxed">
+      <h3 className="text-xl font-light text-black group-hover:text-red transition-colors duration-300 mb-3">
+        {project.title}
+      </h3>
+
+      <p className="text-sm text-black/60 leading-relaxed mb-6">
         {project.description}
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-6">
         {project.tags.map((tag) => (
           <span
             key={tag}
-            className="bg-black text-beige px-2 py-1 text-xs rounded"
+            className="text-xs text-black/40 border border-black/10 px-2 py-1"
           >
             {tag}
           </span>
         ))}
       </div>
 
-      <div className="flex gap-3 pt-2">
-        {project.github && (
-          <a
-            href={project.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-pixel hover:text-red transition-colors underline"
-          >
-            GitHub
-          </a>
-        )}
-        {project.liveUrl && (
-          <a
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-pixel hover:text-red transition-colors underline"
-          >
-            Live Demo
-          </a>
-        )}
-      </div>
+      {(project.github || project.liveUrl) && (
+        <div className="flex gap-4 pt-4 border-t border-black/5">
+          {project.github && (
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-black/50 hover:text-red transition-colors duration-300"
+            >
+              GitHub
+            </a>
+          )}
+          {project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-black/50 hover:text-red transition-colors duration-300"
+            >
+              Live
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }

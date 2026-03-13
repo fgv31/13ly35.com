@@ -6,31 +6,20 @@ interface RecommendationCardProps {
 }
 
 export default function RecommendationCard({ recommendation }: RecommendationCardProps) {
-  const categoryColors: Record<string, string> = {
-    movies: "bg-red text-beige",
-    music: "bg-black text-beige",
-    objects: "bg-beige text-black border-2 border-black",
-    places: "bg-red/10 text-black border-2 border-red",
-  };
-
   return (
-    <div className="pixel-hover bg-white border-2 border-black p-4 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-pixel text-xs leading-relaxed flex-1">
-          {recommendation.title}
-        </h3>
-        <span
-          className={`${
-            categoryColors[recommendation.category]
-          } px-2 py-1 text-[10px] font-pixel uppercase whitespace-nowrap`}
-        >
+    <div className="group p-6 bg-white/50 hover:bg-white transition-colors duration-300">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <span className="text-xs uppercase tracking-[0.15em] text-black/40">
           {recommendation.category}
         </span>
+        <StarRating rating={recommendation.rating} />
       </div>
 
-      <StarRating rating={recommendation.rating} />
+      <h3 className="text-lg font-light text-black group-hover:text-red transition-colors duration-300 mb-2">
+        {recommendation.title}
+      </h3>
 
-      <p className="font-sans text-sm text-black/80">
+      <p className="text-sm text-black/50 leading-relaxed">
         {recommendation.description}
       </p>
     </div>

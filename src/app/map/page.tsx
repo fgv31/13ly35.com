@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { places, Place } from "@/data/mock/places";
 
-// You'll need to add your Mapbox token
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "YOUR_MAPBOX_TOKEN";
 
 export default function MapPage() {
@@ -56,7 +57,6 @@ export default function MapPage() {
       zoom: 2,
     });
 
-    // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     return () => {
@@ -65,26 +65,23 @@ export default function MapPage() {
     };
   }, []);
 
-  // Add/update markers when filter changes
   useEffect(() => {
     if (!map.current) return;
 
-    // Remove existing markers
     const existingMarkers = document.querySelectorAll(".custom-marker");
     existingMarkers.forEach(marker => marker.remove());
 
-    // Add new markers
     filteredPlaces.forEach(place => {
       const el = document.createElement("div");
       el.className = "custom-marker";
       el.style.cssText = `
-        width: 16px;
-        height: 16px;
-        background: ${place.category === "lived" ? "#FF1A00" : place.category === "visited" ? "#1A1A1A" : "#888"};
+        width: 12px;
+        height: 12px;
+        background: ${place.category === "lived" ? "#FF1A00" : place.category === "visited" ? "#1A1A1A" : "#999"};
         border: 2px solid #F5F2EB;
         border-radius: 50%;
         cursor: pointer;
-        transition: transform 0.2s;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       `;
       el.addEventListener("mouseenter", () => {
         el.style.transform = "scale(1.5)";
@@ -110,104 +107,132 @@ export default function MapPage() {
   const categoryColors = {
     lived: "bg-red",
     visited: "bg-black",
-    "bucket-list": "bg-gray-400",
+    "bucket-list": "bg-black/30",
   };
 
   return (
-    <main className="min-h-screen bg-beige">
-      {/* Header */}
-      <div className="p-8">
-        <h1 className="font-pixel text-2xl md:text-4xl mb-4">MAP</h1>
-        <p className="text-lg text-black/70 mb-6">Places I&apos;ve been and where I&apos;m going</p>
+    <div className="min-h-screen bg-beige flex flex-col">
+      <Header />
 
-        {/* Filter buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(["all", "lived", "visited", "bucket-list"] as const).map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-4 py-2 font-mono text-sm border-2 border-black transition-all ${
-                filter === cat
-                  ? "bg-black text-beige"
-                  : "bg-beige text-black hover:bg-black/10"
-              }`}
-            >
-              {cat.toUpperCase()}
-            </button>
-          ))}
-        </div>
+      <main className="flex-1 pt-32 pb-24">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Header */}
+          <header className="mb-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">02 / Map</p>
+            <h1 className="text-4xl md:text-6xl font-light text-black mb-6">
+              Wandering
+            </h1>
+            <p className="text-lg text-black/60 max-w-2xl leading-relaxed">
+              Places I&apos;ve been and where I&apos;m going.
+            </p>
+          </header>
 
-        {/* Legend */}
-        <div className="flex gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red rounded-full border border-beige"></div>
-            <span>Lived</span>
+          {/* Filter buttons */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {(["all", "lived", "visited", "bucket-list"] as const).map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`px-5 py-2.5 text-sm capitalize transition-all duration-300 ${
+                  filter === cat
+                    ? "bg-black text-beige"
+                    : "bg-transparent text-black/60 hover:text-black"
+                }`}
+              >
+                {cat === "bucket-list" ? "Bucket List" : cat}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-black rounded-full border border-beige"></div>
-            <span>Visited</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full border border-beige"></div>
-            <span>Bucket List</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Map container */}
-      <div className="relative h-[60vh] mx-8 mb-8 border-2 border-black">
-        <div ref={mapContainer} className="w-full h-full" />
-
-        {/* Selected place card */}
-        {selectedPlace && (
-          <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-beige border-2 border-black p-4 shadow-[4px_4px_0_#1A1A1A]">
-            <button
-              onClick={() => setSelectedPlace(null)}
-              className="absolute top-2 right-2 text-black/50 hover:text-red"
-            >
-              ✕
-            </button>
-            <div className={`inline-block px-2 py-1 text-xs font-mono mb-2 ${
-              selectedPlace.category === "lived" ? "bg-red text-beige" :
-              selectedPlace.category === "visited" ? "bg-black text-beige" :
-              "bg-gray-400 text-black"
-            }`}>
-              {selectedPlace.category.toUpperCase()}
+          {/* Legend */}
+          <div className="flex gap-6 text-sm mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-red rounded-full"></div>
+              <span className="text-black/60">Lived</span>
             </div>
-            <h3 className="font-pixel text-lg">{selectedPlace.name}</h3>
-            <p className="text-sm text-black/70">{selectedPlace.country} • {selectedPlace.date}</p>
-            <p className="mt-2 text-sm">{selectedPlace.description}</p>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+              <span className="text-black/60">Visited</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-black/30 rounded-full"></div>
+              <span className="text-black/60">Bucket List</span>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Places list */}
-      <div className="px-8 pb-8">
-        <h2 className="font-pixel text-lg mb-4">ALL PLACES</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPlaces.map(place => (
-            <button
-              key={place.id}
-              onClick={() => {
-                setSelectedPlace(place);
-                map.current?.flyTo({
-                  center: place.coordinates,
-                  zoom: 5,
-                  duration: 1500,
-                });
-              }}
-              className="text-left p-4 border-2 border-black bg-beige hover:shadow-[4px_4px_0_#FF1A00] transition-all"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <div className={`w-2 h-2 rounded-full ${categoryColors[place.category]}`}></div>
-                <span className="font-mono text-xs text-black/50">{place.category}</span>
+          {/* Map container */}
+          <div className="relative h-[60vh] mb-16 overflow-hidden">
+            <div ref={mapContainer} className="w-full h-full" />
+
+            {/* Selected place card */}
+            {selectedPlace && (
+              <div className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-80 bg-white p-6">
+                <button
+                  onClick={() => setSelectedPlace(null)}
+                  className="absolute top-4 right-4 text-black/30 hover:text-red transition-colors duration-300"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                <span className={`inline-block text-xs uppercase tracking-[0.15em] mb-3 ${
+                  selectedPlace.category === "lived" ? "text-red" :
+                  selectedPlace.category === "visited" ? "text-black" :
+                  "text-black/40"
+                }`}>
+                  {selectedPlace.category}
+                </span>
+                <h3 className="text-xl font-light text-black mb-1">{selectedPlace.name}</h3>
+                <p className="text-sm text-black/40 mb-3">{selectedPlace.country} · {selectedPlace.date}</p>
+                <p className="text-sm text-black/60 leading-relaxed">{selectedPlace.description}</p>
               </div>
-              <h3 className="font-bold">{place.name}, {place.country}</h3>
-              <p className="text-sm text-black/70">{place.date}</p>
-            </button>
-          ))}
+            )}
+          </div>
+
+          {/* Places grid */}
+          <div>
+            <h2 className="text-xs uppercase tracking-[0.2em] text-black/40 mb-6">All Places</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPlaces.map((place, index) => (
+                <button
+                  key={place.id}
+                  onClick={() => {
+                    setSelectedPlace(place);
+                    map.current?.flyTo({
+                      center: place.coordinates,
+                      zoom: 5,
+                      duration: 1500,
+                    });
+                  }}
+                  className="text-left p-6 bg-white/50 hover:bg-white transition-all duration-300 group"
+                  style={{
+                    opacity: 0,
+                    animation: `fadeIn 0.5s ease-out ${index * 0.05}s forwards`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`w-2 h-2 rounded-full ${categoryColors[place.category]}`}></div>
+                    <span className="text-xs uppercase tracking-[0.15em] text-black/40">{place.category}</span>
+                  </div>
+                  <h3 className="text-lg font-light text-black group-hover:text-red transition-colors duration-300">
+                    {place.name}, {place.country}
+                  </h3>
+                  <p className="text-sm text-black/40">{place.date}</p>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+
+      <Footer />
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
   );
 }

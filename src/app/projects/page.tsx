@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { projects, type ProjectStatus } from "@/data/mock/projects";
 import ProjectCard from "@/components/ui/ProjectCard";
 
@@ -15,46 +17,71 @@ export default function ProjectsPage() {
       : projects.filter((project) => project.status === filter);
 
   return (
-    <div className="min-h-screen bg-beige px-6 py-12 md:px-12 lg:px-24">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <h1 className="font-pixel text-2xl md:text-4xl text-black mb-8 leading-relaxed">
-          Crazy FUCKING Projects
-        </h1>
+    <div className="min-h-screen bg-beige flex flex-col">
+      <Header />
 
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-3 mb-12">
-          {(["all", "idea", "built", "ongoing"] as const).map((option) => (
-            <button
-              key={option}
-              onClick={() => setFilter(option)}
-              className={`pixel-hover px-4 py-2 border-2 border-black rounded font-pixel text-sm transition-colors ${
-                filter === option
-                  ? "bg-red text-beige"
-                  : "bg-beige text-black hover:bg-black hover:text-beige"
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredProjects.length === 0 && (
-          <div className="text-center py-20">
-            <p className="font-pixel text-lg text-black">
-              No projects found for this filter
+      <main className="flex-1 pt-32 pb-24">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Header */}
+          <header className="mb-16">
+            <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">04 / Projects</p>
+            <h1 className="text-4xl md:text-6xl font-light text-black mb-6">
+              Building
+            </h1>
+            <p className="text-lg text-black/60 max-w-2xl leading-relaxed">
+              Ideas brought to life, works in progress, and concepts waiting to be built.
             </p>
+          </header>
+
+          {/* Filter Buttons */}
+          <div className="flex flex-wrap gap-2 mb-12">
+            {(["all", "built", "ongoing", "idea"] as const).map((option) => (
+              <button
+                key={option}
+                onClick={() => setFilter(option)}
+                className={`px-5 py-2.5 text-sm capitalize transition-all duration-300 ${
+                  filter === option
+                    ? "bg-black text-beige"
+                    : "bg-transparent text-black/60 hover:text-black"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* Projects Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredProjects.map((project, index) => (
+              <div
+                key={project.id}
+                style={{
+                  opacity: 0,
+                  animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`,
+                }}
+              >
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredProjects.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-black/40">No projects in this category yet.</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
