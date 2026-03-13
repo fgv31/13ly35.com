@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -12,7 +13,18 @@ export default function NowPage() {
         <div className="mx-auto max-w-2xl px-6 text-center">
           {/* Header */}
           <header className="mb-16">
-            <p className="font-mono text-xs text-magenta mb-4">[05] // NOW_MODULE</p>
+            <div className="flex items-start justify-between mb-4">
+              <p className="font-mono text-xs text-magenta">[05] // NOW_MODULE</p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                </svg>
+                EXIT()
+              </Link>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               <span className="text-cyan">LOADING</span>...
             </h1>
