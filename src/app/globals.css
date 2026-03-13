@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F5F2EB;
+  --foreground: #1A1A1A;
+  --accent: #FF1A00;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-beige: #F5F2EB;
+  --color-black: #1A1A1A;
+  --color-red: #FF1A00;
+  --font-sans: var(--font-inter);
+  --font-pixel: var(--font-press-start);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Pixel accent utilities */
+.pixel-hover {
+  transition: all 0.1s steps(3);
+}
+
+.pixel-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--accent);
+  color: var(--background);
+}
