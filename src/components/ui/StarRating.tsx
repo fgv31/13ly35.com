@@ -12,7 +12,7 @@ export default function StarRating({ rating, maxRating = 5 }: StarRatingProps) {
           <div
             key={i}
             className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              isFilled ? "bg-red" : "bg-black/20"
+              isFilled ? "bg-red" : "bg-beige/20"
             }`}
           />
         );

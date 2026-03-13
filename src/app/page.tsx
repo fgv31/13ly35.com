@@ -39,7 +39,7 @@ const navigationCards = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-beige">
+    <div className="flex min-h-screen flex-col bg-dark">
       <Header />
 
       <main className="flex-1 pt-20">
@@ -48,14 +48,14 @@ export default function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="max-w-4xl">
               {/* Main Title */}
-              <h1 className="text-[clamp(3rem,10vw,8rem)] font-light leading-[0.9] tracking-tight text-black">
+              <h1 className="text-[clamp(3rem,10vw,8rem)] font-light leading-[0.9] tracking-tight text-beige">
                 Creative
                 <br />
                 <span className="text-red">Expression</span>
               </h1>
 
               {/* Tagline */}
-              <p className="mt-12 max-w-lg text-lg text-black/60 leading-relaxed">
+              <p className="mt-12 max-w-lg text-lg text-beige/60 leading-relaxed">
                 Building digital experiences, exploring the world, and documenting the journey along the way.
               </p>
 
@@ -63,7 +63,7 @@ export default function Home() {
               <div className="mt-12 flex items-center gap-8">
                 <Link
                   href="/about"
-                  className="group inline-flex items-center gap-3 text-sm font-medium text-black"
+                  className="group inline-flex items-center gap-3 text-sm font-medium text-beige"
                 >
                   <span>Explore</span>
                   <svg
@@ -81,31 +81,31 @@ export default function Home() {
         </section>
 
         {/* Navigation Cards Grid */}
-        <section className="px-6 py-24 border-t border-black/5">
+        <section className="px-6 py-24 border-t border-beige/5">
           <div className="mx-auto max-w-7xl">
-            <div className="grid gap-px bg-black/5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-px bg-beige/5 sm:grid-cols-2 lg:grid-cols-3">
               {navigationCards.map((card, index) => (
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="group relative bg-beige p-10 transition-colors duration-500 hover:bg-black"
+                  className="group relative bg-dark p-10 transition-colors duration-500 hover:bg-beige"
                   style={{
                     opacity: 0,
                     animation: `fadeIn 0.6s ease-out ${index * 0.1}s forwards`,
                   }}
                 >
                   {/* Number */}
-                  <span className="text-xs text-black/20 group-hover:text-white/30 transition-colors duration-500">
+                  <span className="text-xs text-beige/20 group-hover:text-dark/30 transition-colors duration-500">
                     {card.number}
                   </span>
 
                   {/* Title */}
-                  <h2 className="mt-8 text-2xl font-light text-black group-hover:text-white transition-colors duration-500">
+                  <h2 className="mt-8 text-2xl font-light text-beige group-hover:text-dark transition-colors duration-500">
                     {card.title}
                   </h2>
 
                   {/* Description */}
-                  <p className="mt-3 text-sm text-black/50 group-hover:text-white/60 transition-colors duration-500">
+                  <p className="mt-3 text-sm text-beige/50 group-hover:text-dark/60 transition-colors duration-500">
                     {card.description}
                   </p>
 
@@ -131,16 +131,16 @@ export default function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
               <div>
-                <h2 className="text-4xl md:text-5xl font-light text-black">
+                <h2 className="text-4xl md:text-5xl font-light text-beige">
                   Let&apos;s connect
                 </h2>
-                <p className="mt-4 text-black/50 max-w-md">
+                <p className="mt-4 text-beige/50 max-w-md">
                   Open to conversations, collaborations, and new opportunities.
                 </p>
               </div>
               <a
                 href="mailto:hello@13ly35.com"
-                className="inline-flex items-center gap-3 text-sm font-medium text-black border-b border-black pb-1 hover:text-red hover:border-red transition-colors duration-300"
+                className="inline-flex items-center gap-3 text-sm font-medium text-beige border-b border-beige pb-1 hover:text-red hover:border-red transition-colors duration-300"
               >
                 hello@13ly35.com
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

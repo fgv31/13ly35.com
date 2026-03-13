@@ -17,18 +17,18 @@ export default function ProjectsPage() {
       : projects.filter((project) => project.status === filter);
 
   return (
-    <div className="min-h-screen bg-beige flex flex-col">
+    <div className="min-h-screen bg-dark flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-16">
-            <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">04 / Projects</p>
-            <h1 className="text-4xl md:text-6xl font-light text-black mb-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">04 / Projects</p>
+            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
               Building
             </h1>
-            <p className="text-lg text-black/60 max-w-2xl leading-relaxed">
+            <p className="text-lg text-beige/60 max-w-2xl leading-relaxed">
               Ideas brought to life, works in progress, and concepts waiting to be built.
             </p>
           </header>
@@ -41,8 +41,8 @@ export default function ProjectsPage() {
                 onClick={() => setFilter(option)}
                 className={`px-5 py-2.5 text-sm capitalize transition-all duration-300 ${
                   filter === option
-                    ? "bg-black text-beige"
-                    : "bg-transparent text-black/60 hover:text-black"
+                    ? "bg-beige text-dark"
+                    : "bg-transparent text-beige/60 hover:text-beige"
                 }`}
               >
                 {option}
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
           {/* Empty State */}
           {filteredProjects.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-black/40">No projects in this category yet.</p>
+              <p className="text-beige/40">No projects in this category yet.</p>
             </div>
           )}
         </div>

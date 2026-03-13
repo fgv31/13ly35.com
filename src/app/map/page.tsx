@@ -46,9 +46,10 @@ export default function MapPage() {
             type: "raster",
             source: "osm-tiles",
             paint: {
-              "raster-saturation": -0.8,
-              "raster-brightness-min": 0.1,
-              "raster-contrast": 0.1,
+              "raster-saturation": -1,
+              "raster-brightness-min": 0,
+              "raster-brightness-max": 0.3,
+              "raster-contrast": 0.2,
             },
           },
         ],
@@ -77,8 +78,8 @@ export default function MapPage() {
       el.style.cssText = `
         width: 12px;
         height: 12px;
-        background: ${place.category === "lived" ? "#FF1A00" : place.category === "visited" ? "#1A1A1A" : "#999"};
-        border: 2px solid #F5F2EB;
+        background: ${place.category === "lived" ? "#FF1A00" : place.category === "visited" ? "#F5F2EB" : "#666"};
+        border: 2px solid #0A0A0A;
         border-radius: 50%;
         cursor: pointer;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -106,23 +107,23 @@ export default function MapPage() {
 
   const categoryColors = {
     lived: "bg-red",
-    visited: "bg-black",
-    "bucket-list": "bg-black/30",
+    visited: "bg-beige",
+    "bucket-list": "bg-beige/30",
   };
 
   return (
-    <div className="min-h-screen bg-beige flex flex-col">
+    <div className="min-h-screen bg-dark flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-12">
-            <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">02 / Map</p>
-            <h1 className="text-4xl md:text-6xl font-light text-black mb-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">02 / Map</p>
+            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
               Wandering
             </h1>
-            <p className="text-lg text-black/60 max-w-2xl leading-relaxed">
+            <p className="text-lg text-beige/60 max-w-2xl leading-relaxed">
               Places I&apos;ve been and where I&apos;m going.
             </p>
           </header>
@@ -135,8 +136,8 @@ export default function MapPage() {
                 onClick={() => setFilter(cat)}
                 className={`px-5 py-2.5 text-sm capitalize transition-all duration-300 ${
                   filter === cat
-                    ? "bg-black text-beige"
-                    : "bg-transparent text-black/60 hover:text-black"
+                    ? "bg-beige text-dark"
+                    : "bg-transparent text-beige/60 hover:text-beige"
                 }`}
               >
                 {cat === "bucket-list" ? "Bucket List" : cat}
@@ -148,28 +149,28 @@ export default function MapPage() {
           <div className="flex gap-6 text-sm mb-8">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-red rounded-full"></div>
-              <span className="text-black/60">Lived</span>
+              <span className="text-beige/60">Lived</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-black rounded-full"></div>
-              <span className="text-black/60">Visited</span>
+              <div className="w-2 h-2 bg-beige rounded-full"></div>
+              <span className="text-beige/60">Visited</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-black/30 rounded-full"></div>
-              <span className="text-black/60">Bucket List</span>
+              <div className="w-2 h-2 bg-beige/30 rounded-full"></div>
+              <span className="text-beige/60">Bucket List</span>
             </div>
           </div>
 
           {/* Map container */}
-          <div className="relative h-[60vh] mb-16 overflow-hidden">
+          <div className="relative h-[60vh] mb-16 overflow-hidden border border-beige/10">
             <div ref={mapContainer} className="w-full h-full" />
 
             {/* Selected place card */}
             {selectedPlace && (
-              <div className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-80 bg-white p-6">
+              <div className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-80 bg-dark border border-beige/10 p-6">
                 <button
                   onClick={() => setSelectedPlace(null)}
-                  className="absolute top-4 right-4 text-black/30 hover:text-red transition-colors duration-300"
+                  className="absolute top-4 right-4 text-beige/30 hover:text-red transition-colors duration-300"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -177,21 +178,21 @@ export default function MapPage() {
                 </button>
                 <span className={`inline-block text-xs uppercase tracking-[0.15em] mb-3 ${
                   selectedPlace.category === "lived" ? "text-red" :
-                  selectedPlace.category === "visited" ? "text-black" :
-                  "text-black/40"
+                  selectedPlace.category === "visited" ? "text-beige" :
+                  "text-beige/40"
                 }`}>
                   {selectedPlace.category}
                 </span>
-                <h3 className="text-xl font-light text-black mb-1">{selectedPlace.name}</h3>
-                <p className="text-sm text-black/40 mb-3">{selectedPlace.country} · {selectedPlace.date}</p>
-                <p className="text-sm text-black/60 leading-relaxed">{selectedPlace.description}</p>
+                <h3 className="text-xl font-light text-beige mb-1">{selectedPlace.name}</h3>
+                <p className="text-sm text-beige/40 mb-3">{selectedPlace.country} · {selectedPlace.date}</p>
+                <p className="text-sm text-beige/60 leading-relaxed">{selectedPlace.description}</p>
               </div>
             )}
           </div>
 
           {/* Places grid */}
           <div>
-            <h2 className="text-xs uppercase tracking-[0.2em] text-black/40 mb-6">All Places</h2>
+            <h2 className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-6">All Places</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPlaces.map((place, index) => (
                 <button
@@ -204,7 +205,7 @@ export default function MapPage() {
                       duration: 1500,
                     });
                   }}
-                  className="text-left p-6 bg-white/50 hover:bg-white transition-all duration-300 group"
+                  className="text-left p-6 bg-beige/5 hover:bg-beige/10 transition-all duration-300 group"
                   style={{
                     opacity: 0,
                     animation: `fadeIn 0.5s ease-out ${index * 0.05}s forwards`,
@@ -212,12 +213,12 @@ export default function MapPage() {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <div className={`w-2 h-2 rounded-full ${categoryColors[place.category]}`}></div>
-                    <span className="text-xs uppercase tracking-[0.15em] text-black/40">{place.category}</span>
+                    <span className="text-xs uppercase tracking-[0.15em] text-beige/40">{place.category}</span>
                   </div>
-                  <h3 className="text-lg font-light text-black group-hover:text-red transition-colors duration-300">
+                  <h3 className="text-lg font-light text-beige group-hover:text-red transition-colors duration-300">
                     {place.name}, {place.country}
                   </h3>
-                  <p className="text-sm text-black/40">{place.date}</p>
+                  <p className="text-sm text-beige/40">{place.date}</p>
                 </button>
               ))}
             </div>

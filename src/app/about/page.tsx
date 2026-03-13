@@ -12,18 +12,18 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-beige flex flex-col">
+    <div className="min-h-screen bg-dark flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-4xl px-6">
           {/* Header */}
           <header className="mb-16">
-            <p className="text-xs uppercase tracking-[0.2em] text-black/40 mb-4">01 / About</p>
-            <h1 className="text-4xl md:text-6xl font-light text-black mb-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">01 / About</p>
+            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
               The Journey
             </h1>
-            <p className="text-lg text-black/60 max-w-2xl leading-relaxed">
+            <p className="text-lg text-beige/60 max-w-2xl leading-relaxed">
               A timeline of experiences, milestones, and the moments that shaped the path.
             </p>
           </header>
@@ -35,7 +35,7 @@ export default function AboutPage() {
           <div className="mt-20">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-black/50 hover:text-black transition-colors duration-300"
+              className="inline-flex items-center gap-2 text-sm text-beige/50 hover:text-beige transition-colors duration-300"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />

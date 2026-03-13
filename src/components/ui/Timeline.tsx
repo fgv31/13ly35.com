@@ -17,7 +17,7 @@ export default function Timeline({ entries }: TimelineProps) {
   return (
     <div className="relative">
       {/* Vertical line */}
-      <div className="absolute left-0 top-0 bottom-0 w-px bg-black/10" />
+      <div className="absolute left-0 top-0 bottom-0 w-px bg-beige/10" />
 
       <div className="space-y-0">
         {entries.map((entry, index) => {
@@ -28,7 +28,7 @@ export default function Timeline({ entries }: TimelineProps) {
               {/* Timeline marker */}
               <div
                 className={`absolute left-[-4px] top-1 w-2 h-2 rounded-full transition-all duration-300 ${
-                  isExpanded ? "bg-red scale-150" : "bg-black/30"
+                  isExpanded ? "bg-red scale-150" : "bg-beige/30"
                 }`}
               />
 
@@ -38,16 +38,16 @@ export default function Timeline({ entries }: TimelineProps) {
                 className="w-full text-left group"
               >
                 <div className="flex items-baseline gap-4 mb-2">
-                  <span className="text-xs uppercase tracking-[0.15em] text-black/40">
+                  <span className="text-xs uppercase tracking-[0.15em] text-beige/40">
                     {entry.year}
                   </span>
-                  <span className="text-xs text-black/30">
+                  <span className="text-xs text-beige/30">
                     {entry.type}
                   </span>
                 </div>
 
                 <h3 className={`text-xl font-light transition-colors duration-300 ${
-                  isExpanded ? "text-red" : "text-black group-hover:text-red"
+                  isExpanded ? "text-red" : "text-beige group-hover:text-red"
                 }`}>
                   {entry.title}
                 </h3>
@@ -57,7 +57,7 @@ export default function Timeline({ entries }: TimelineProps) {
                     isExpanded ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
                   }`}
                 >
-                  <p className="text-sm text-black/60 leading-relaxed">
+                  <p className="text-sm text-beige/60 leading-relaxed">
                     {entry.description}
                   </p>
                 </div>

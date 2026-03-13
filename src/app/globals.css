@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F5F2EB;
-  --foreground: #1A1A1A;
+  --background: #0A0A0A;
+  --foreground: #F5F2EB;
   --accent: #FF1A00;
 }
 
@@ -11,7 +11,8 @@
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
   --color-beige: #F5F2EB;
-  --color-black: #1A1A1A;
+  --color-black: #0A0A0A;
+  --color-dark: #0A0A0A;
   --color-red: #FF1A00;
   --font-sans: var(--font-inter);
   --font-pixel: var(--font-press-start);
