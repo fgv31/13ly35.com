@@ -29,10 +29,9 @@ export default function Footer() {
           <div>
             <p className="font-mono text-xs text-magenta mb-6">NAV_LINKS</p>
             <div className="flex flex-col gap-3">
-              <Link href="/about" className="font-mono text-xs text-white/50 hover:text-cyan transition-colors duration-300">./about</Link>
+              <Link href="/about" className="font-mono text-xs text-white/50 hover:text-cyan transition-colors duration-300">./journey</Link>
               <Link href="/projects" className="font-mono text-xs text-white/50 hover:text-cyan transition-colors duration-300">./projects</Link>
               <Link href="/taste" className="font-mono text-xs text-white/50 hover:text-cyan transition-colors duration-300">./taste</Link>
-              <Link href="/map" className="font-mono text-xs text-white/50 hover:text-cyan transition-colors duration-300">./map</Link>
             </div>
           </div>
 

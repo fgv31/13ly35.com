@@ -6,34 +6,28 @@ import Footer from "@/components/layout/Footer";
 
 const navigationCards = [
   {
-    title: "ABOUT",
+    title: "JOURNEY",
     href: "/about",
-    description: "History, experiences, and the journey so far",
+    description: "From Verona to Berlin — the places and what happened there",
     number: "01",
-  },
-  {
-    title: "MAP",
-    href: "/map",
-    description: "Places explored and destinations ahead",
-    number: "02",
   },
   {
     title: "TASTE",
     href: "/taste",
     description: "Curated recommendations across media and objects",
-    number: "03",
+    number: "02",
   },
   {
     title: "PROJECTS",
     href: "/projects",
     description: "Ideas built, building, and imagined",
-    number: "04",
+    number: "03",
   },
   {
     title: "NOW",
     href: "/now",
     description: "Current focus and weekly reflections",
-    number: "05",
+    number: "04",
   },
 ];
 
