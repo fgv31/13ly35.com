@@ -9,6 +9,8 @@ import { recommendations, type Category } from "@/data/mock/recommendations";
 
 export default function TastePage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "all">("all");
+  const [exactRating, setExactRating] = useState<number>(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const categories: Array<{ value: Category | "all"; label: string }> = [
     { value: "all", label: "ALL" },
@@ -18,10 +20,11 @@ export default function TastePage() {
     { value: "places", label: "PLACES" },
   ];
 
-  const filteredRecommendations =
-    selectedCategory === "all"
-      ? recommendations
-      : recommendations.filter((rec) => rec.category === selectedCategory);
+  const filteredRecommendations = recommendations.filter((rec) => {
+    if (selectedCategory !== "all" && rec.category !== selectedCategory) return false;
+    if (exactRating > 0 && rec.rating !== exactRating) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-dark cyber-grid flex flex-col">
@@ -32,7 +35,7 @@ export default function TastePage() {
           {/* Header */}
           <header className="mb-16">
             <div className="flex items-start justify-between mb-4">
-              <p className="font-mono text-xs text-magenta">[03] // TASTE_MODULE</p>
+              <p className="font-mono text-xs text-magenta">[02] // TASTE_MODULE</p>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
@@ -51,21 +54,52 @@ export default function TastePage() {
             </p>
           </header>
 
-          {/* Category Filters */}
-          <div className="mb-12 flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
-                  selectedCategory === category.value
-                    ? "bg-cyan text-dark border-cyan"
-                    : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
+          {/* Filters */}
+          <div className="mb-12 flex flex-wrap items-center gap-6">
+            {/* Category */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.value}
+                  onClick={() => setSelectedCategory(category.value)}
+                  className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
+                    selectedCategory === category.value
+                      ? "bg-cyan text-dark border-cyan"
+                      : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Star filter */}
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setExactRating(exactRating === star ? 0 : star)}
+                  className="transition-all duration-300"
+                >
+                  <div
+                    className={`w-3 h-3 transition-all duration-300 ${
+                      star === exactRating
+                        ? "bg-cyan shadow-[0_0_6px_#00ff66]"
+                        : "bg-white/10 hover:bg-white/20"
+                    }`}
+                    style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+                  />
+                </button>
+              ))}
+              {exactRating > 0 && (
+                <button
+                  onClick={() => setExactRating(0)}
+                  className="font-mono text-[10px] text-white/30 hover:text-cyan transition-colors ml-1"
+                >
+                  CLEAR
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Recommendations Grid */}
@@ -73,12 +107,21 @@ export default function TastePage() {
             {filteredRecommendations.map((recommendation, index) => (
               <div
                 key={recommendation.id}
+                className={`transition-all duration-500 ${
+                  expandedId === recommendation.id
+                    ? "md:col-span-2 lg:col-span-2 md:row-span-2"
+                    : ""
+                }`}
                 style={{
                   opacity: 0,
                   animation: `fadeIn 0.5s ease-out ${index * 0.05}s forwards`,
                 }}
               >
-                <RecommendationCard recommendation={recommendation} />
+                <RecommendationCard
+                  recommendation={recommendation}
+                  isExpanded={expandedId === recommendation.id}
+                  onClick={() => setExpandedId(expandedId === recommendation.id ? null : recommendation.id)}
+                />
               </div>
             ))}
           </div>

@@ -210,7 +210,7 @@ export default function AboutPage() {
       <Header />
 
       {/* Info bar — fixed below header */}
-      <div className="shrink-0 px-6 pt-24 pb-4 border-b border-white/5">
+      <div className="shrink-0 px-6 pt-32 pb-4 border-b border-white/5">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-start justify-between mb-4">
             <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
@@ -227,7 +227,7 @@ export default function AboutPage() {
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
             THE <span className="text-cyan">JOURNEY</span>
           </h1>
-          <p className="text-sm text-white/50 max-w-2xl leading-relaxed font-mono mb-4">
+          <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono mb-4">
             <span className="text-cyan">&gt;</span> From Verona to Frankfurt to London to Berlin — through central banking, startups, and ambulances.
           </p>
 
