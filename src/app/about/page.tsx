@@ -17,6 +17,13 @@ const categoryMarkerColors: Record<string, string> = {
   queued: "#555555",
 };
 
+// Sort: queued first, then the rest (chronological — live will be near top)
+const sortedEntries = (() => {
+  const queued = journeyData.filter((e) => e.category === "queued");
+  const rest = journeyData.filter((e) => e.category !== "queued");
+  return [...queued, ...rest];
+})();
+
 export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -64,7 +71,7 @@ export default function AboutPage() {
 
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    journeyData.forEach((entry, index) => {
+    sortedEntries.forEach((entry, index) => {
       const color = categoryMarkerColors[entry.category];
       const isLive = entry.category === "live";
       const isQueued = entry.category === "queued";
@@ -107,6 +114,24 @@ export default function AboutPage() {
       map.current?.remove();
       map.current = null;
     };
+  }, []);
+
+  // Auto-scroll to LIVE location on mount
+  useEffect(() => {
+    const liveIndex = sortedEntries.findIndex((e) => e.category === "live");
+    if (liveIndex === -1) return;
+
+    const timer = setTimeout(() => {
+      timelineRef.current?.scrollToLocation(liveIndex);
+      const liveEntry = sortedEntries[liveIndex];
+      map.current?.flyTo({
+        center: liveEntry.coordinates,
+        zoom: 5,
+        duration: 2000,
+      });
+    }, 800);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLocationClick = useCallback((entry: JourneyEntry) => {
@@ -167,7 +192,7 @@ export default function AboutPage() {
           {/* Timeline panel — scrollable */}
           <div className="md:w-1/2 lg:w-3/5 overflow-y-auto min-h-0 pr-4 scrollbar-thin">
             <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
-            <Timeline ref={timelineRef} entries={journeyData} onLocationClick={handleLocationClick} />
+            <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
           </div>
 
           {/* Map panel — fixed, fills height */}
