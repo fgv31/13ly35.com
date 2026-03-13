@@ -10,11 +10,11 @@ export default function TastePage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "all">("all");
 
   const categories: Array<{ value: Category | "all"; label: string }> = [
-    { value: "all", label: "All" },
-    { value: "movies", label: "Movies" },
-    { value: "music", label: "Music" },
-    { value: "objects", label: "Objects" },
-    { value: "places", label: "Places" },
+    { value: "all", label: "ALL" },
+    { value: "movies", label: "MOVIES" },
+    { value: "music", label: "MUSIC" },
+    { value: "objects", label: "OBJECTS" },
+    { value: "places", label: "PLACES" },
   ];
 
   const filteredRecommendations =
@@ -23,19 +23,19 @@ export default function TastePage() {
       : recommendations.filter((rec) => rec.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col">
+    <div className="min-h-screen bg-dark cyber-grid flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-16">
-            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">03 / Taste</p>
-            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
-              Curated
+            <p className="font-mono text-xs text-magenta mb-4">[03] // TASTE_MODULE</p>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              <span className="text-cyan">CURATED</span> DATA
             </h1>
-            <p className="text-lg text-beige/60 max-w-2xl leading-relaxed">
-              Things that resonate. Movies, music, objects, and places worth experiencing.
+            <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
+              <span className="text-cyan">&gt;</span> Things that resonate. Movies, music, objects, and places worth experiencing.
             </p>
           </header>
 
@@ -45,10 +45,10 @@ export default function TastePage() {
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
-                className={`px-5 py-2.5 text-sm transition-all duration-300 ${
+                className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
                   selectedCategory === category.value
-                    ? "bg-beige text-dark"
-                    : "bg-transparent text-beige/60 hover:text-beige"
+                    ? "bg-cyan text-dark border-cyan"
+                    : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
                 }`}
               >
                 {category.label}
@@ -57,7 +57,7 @@ export default function TastePage() {
           </div>
 
           {/* Recommendations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredRecommendations.map((recommendation, index) => (
               <div
                 key={recommendation.id}
@@ -73,8 +73,8 @@ export default function TastePage() {
 
           {/* Empty State */}
           {filteredRecommendations.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-beige/40">No recommendations in this category yet.</p>
+            <div className="text-center py-20 border border-cyan/10">
+              <p className="font-mono text-white/40">NO_DATA_FOUND</p>
             </div>
           )}
         </div>

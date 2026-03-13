@@ -17,7 +17,7 @@ export default function Timeline({ entries }: TimelineProps) {
   return (
     <div className="relative">
       {/* Vertical line */}
-      <div className="absolute left-0 top-0 bottom-0 w-px bg-beige/10" />
+      <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan/50 via-magenta/50 to-cyan/50" />
 
       <div className="space-y-0">
         {entries.map((entry, index) => {
@@ -28,7 +28,9 @@ export default function Timeline({ entries }: TimelineProps) {
               {/* Timeline marker */}
               <div
                 className={`absolute left-[-4px] top-1 w-2 h-2 rounded-full transition-all duration-300 ${
-                  isExpanded ? "bg-red scale-150" : "bg-beige/30"
+                  isExpanded
+                    ? "bg-cyan scale-150 shadow-[0_0_15px_#00f0ff]"
+                    : "bg-cyan/30"
                 }`}
               />
 
@@ -38,16 +40,16 @@ export default function Timeline({ entries }: TimelineProps) {
                 className="w-full text-left group"
               >
                 <div className="flex items-baseline gap-4 mb-2">
-                  <span className="text-xs uppercase tracking-[0.15em] text-beige/40">
+                  <span className="font-mono text-xs text-cyan/60">
                     {entry.year}
                   </span>
-                  <span className="text-xs text-beige/30">
-                    {entry.type}
+                  <span className="font-mono text-xs text-magenta/50">
+                    {entry.type.toUpperCase()}
                   </span>
                 </div>
 
-                <h3 className={`text-xl font-light transition-colors duration-300 ${
-                  isExpanded ? "text-red" : "text-beige group-hover:text-red"
+                <h3 className={`text-xl font-bold transition-colors duration-300 ${
+                  isExpanded ? "text-cyan glow-cyan" : "text-white group-hover:text-cyan"
                 }`}>
                   {entry.title}
                 </h3>
@@ -57,7 +59,7 @@ export default function Timeline({ entries }: TimelineProps) {
                     isExpanded ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
                   }`}
                 >
-                  <p className="text-sm text-beige/60 leading-relaxed">
+                  <p className="text-sm text-white/50 leading-relaxed border-l-2 border-cyan/30 pl-4">
                     {entry.description}
                   </p>
                 </div>

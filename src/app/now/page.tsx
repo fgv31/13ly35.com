@@ -5,47 +5,44 @@ import Footer from "@/components/layout/Footer";
 
 export default function NowPage() {
   return (
-    <div className="min-h-screen bg-dark flex flex-col">
+    <div className="min-h-screen bg-dark cyber-grid flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24 flex items-center justify-center">
         <div className="mx-auto max-w-2xl px-6 text-center">
           {/* Header */}
           <header className="mb-16">
-            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">05 / Now</p>
-            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
-              In Progress
+            <p className="font-mono text-xs text-magenta mb-4">[05] // NOW_MODULE</p>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              <span className="text-cyan">LOADING</span>...
             </h1>
           </header>
 
           {/* Status indicator */}
           <div className="mb-12">
-            <div className="inline-flex items-center gap-3">
+            <div className="inline-flex items-center gap-3 border border-cyan/30 px-6 py-3 bg-muted/50">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan"></span>
               </span>
-              <span className="text-sm uppercase tracking-[0.15em] text-beige/60">Building</span>
+              <span className="font-mono text-sm text-cyan">SYSTEM_BUILDING</span>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-lg text-beige/60 leading-relaxed mb-12 max-w-md mx-auto">
-            Weekly moodboard — my routine, mood, and thoughts on the world.
-            Updated from my personal knowledge base.
+          <p className="font-mono text-white/50 leading-relaxed mb-12 max-w-md mx-auto">
+            <span className="text-magenta">&gt;</span> Weekly moodboard — my routine, mood, and thoughts on the world.
+            <br />
+            <span className="text-magenta">&gt;</span> Updated from personal knowledge base.
           </p>
 
-          {/* Minimal divider */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <div className="w-12 h-px bg-beige/10"></div>
-            <div className="w-2 h-2 bg-red rounded-full"></div>
-            <div className="w-12 h-px bg-beige/10"></div>
+          {/* Terminal output */}
+          <div className="border border-cyan/20 bg-dark/80 p-6 text-left font-mono text-sm">
+            <p className="text-cyan/60">$ connecting --to obsidian</p>
+            <p className="text-white/40 mt-2">Establishing secure connection...</p>
+            <p className="text-yellow mt-1">⚠ Module under development</p>
+            <p className="text-white/40 mt-2 cursor-blink">Waiting for data sync</p>
           </div>
-
-          {/* Coming soon note */}
-          <p className="text-sm text-beige/40">
-            Connecting to Obsidian...
-          </p>
         </div>
       </main>
 

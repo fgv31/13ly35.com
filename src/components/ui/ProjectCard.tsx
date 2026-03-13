@@ -1,9 +1,9 @@
 import type { Project, ProjectStatus } from "@/data/mock/projects";
 
-const statusStyles: Record<ProjectStatus, string> = {
-  idea: "text-beige/40",
-  built: "text-green-500",
-  ongoing: "text-red",
+const statusStyles: Record<ProjectStatus, { color: string; label: string }> = {
+  idea: { color: "text-yellow", label: "CONCEPT" },
+  built: { color: "text-cyan", label: "DEPLOYED" },
+  ongoing: { color: "text-magenta", label: "IN_DEV" },
 };
 
 interface ProjectCardProps {
@@ -11,19 +11,25 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const status = statusStyles[project.status];
+
   return (
-    <div className="group p-8 bg-beige/5 hover:bg-beige/10 transition-all duration-300">
+    <div className="group p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 transition-all duration-300 relative">
+      {/* Corner accents */}
+      <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+      <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+
       <div className="flex items-start justify-between gap-4 mb-4">
-        <span className={`text-xs uppercase tracking-[0.15em] ${statusStyles[project.status]}`}>
-          {project.status}
+        <span className={`font-mono text-xs ${status.color}`}>
+          [{status.label}]
         </span>
       </div>
 
-      <h3 className="text-xl font-light text-beige group-hover:text-red transition-colors duration-300 mb-3">
+      <h3 className="text-xl font-bold text-white group-hover:text-cyan transition-colors duration-300 mb-3">
         {project.title}
       </h3>
 
-      <p className="text-sm text-beige/60 leading-relaxed mb-6">
+      <p className="text-sm text-white/50 leading-relaxed mb-6">
         {project.description}
       </p>
 
@@ -31,23 +37,23 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {project.tags.map((tag) => (
           <span
             key={tag}
-            className="text-xs text-beige/40 border border-beige/10 px-2 py-1"
+            className="font-mono text-xs text-cyan/60 border border-cyan/20 px-2 py-1"
           >
-            {tag}
+            #{tag}
           </span>
         ))}
       </div>
 
       {(project.github || project.liveUrl) && (
-        <div className="flex gap-4 pt-4 border-t border-beige/5">
+        <div className="flex gap-4 pt-4 border-t border-cyan/10">
           {project.github && (
             <a
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-beige/50 hover:text-red transition-colors duration-300"
+              className="font-mono text-xs text-white/40 hover:text-cyan transition-colors duration-300"
             >
-              GitHub
+              [GITHUB]
             </a>
           )}
           {project.liveUrl && (
@@ -55,9 +61,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-beige/50 hover:text-red transition-colors duration-300"
+              className="font-mono text-xs text-white/40 hover:text-magenta transition-colors duration-300"
             >
-              Live
+              [LIVE]
             </a>
           )}
         </div>

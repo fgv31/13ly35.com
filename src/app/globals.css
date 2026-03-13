@@ -1,19 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0A0A;
-  --foreground: #F5F2EB;
-  --accent: #FF1A00;
+  --background: #0a0a0f;
+  --foreground: #e0e0e0;
+  --accent-cyan: #00f0ff;
+  --accent-magenta: #ff00aa;
+  --accent-yellow: #f0ff00;
+  --muted: #1a1a2e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-accent: var(--accent);
-  --color-beige: #F5F2EB;
-  --color-black: #0A0A0A;
-  --color-dark: #0A0A0A;
-  --color-red: #FF1A00;
+  --color-dark: #0a0a0f;
+  --color-muted: #1a1a2e;
+  --color-cyan: #00f0ff;
+  --color-magenta: #ff00aa;
+  --color-yellow: #f0ff00;
+  --color-white: #e0e0e0;
   --font-sans: var(--font-inter);
   --font-pixel: var(--font-press-start);
   --font-mono: var(--font-geist-mono);
@@ -25,47 +29,123 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Clean hover effect - Valiente style */
-.hover-lift {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.4s ease;
+/* Neon glow effects */
+.glow-cyan {
+  text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-cyan);
 }
 
-.hover-lift:hover {
-  transform: translateY(-4px);
+.glow-magenta {
+  text-shadow: 0 0 10px var(--accent-magenta), 0 0 20px var(--accent-magenta), 0 0 40px var(--accent-magenta);
 }
 
-/* Smooth link underline animation */
-.link-underline {
+.box-glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+
+.box-glow-magenta {
+  box-shadow: 0 0 20px rgba(255, 0, 170, 0.3), inset 0 0 20px rgba(255, 0, 170, 0.05);
+}
+
+/* Hover glow transition */
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan);
+}
+
+/* Cyberpunk border */
+.cyber-border {
+  border: 1px solid rgba(0, 240, 255, 0.3);
   position: relative;
 }
 
-.link-underline::after {
+.cyber-border::before {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
+  top: -1px;
+  left: 10%;
+  right: 10%;
   height: 1px;
-  background: var(--accent);
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
 }
 
-.link-underline:hover::after {
-  width: 100%;
+/* Scanline overlay */
+.scanlines::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.3;
+}
+
+/* Grid background */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0%, 90%, 100% {
+    transform: translate(0);
+    opacity: 1;
+  }
+  92% {
+    transform: translate(-2px, 1px);
+    opacity: 0.8;
+  }
+  94% {
+    transform: translate(2px, -1px);
+    opacity: 0.9;
+  }
+  96% {
+    transform: translate(-1px, 2px);
+    opacity: 0.8;
+  }
+  98% {
+    transform: translate(1px, -2px);
+    opacity: 0.9;
+  }
+}
+
+.glitch-hover:hover {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* Typing cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s infinite;
+  color: var(--accent-cyan);
 }
 
 /* Selection styling */
 ::selection {
-  background: var(--accent);
+  background: var(--accent-magenta);
   color: var(--background);
 }
 
-/* Smooth page transitions */
-.fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
+/* Smooth fade in */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -77,9 +157,35 @@ body {
   }
 }
 
-/* Stagger animation delays */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Neon underline */
+.neon-underline {
+  position: relative;
+}
+
+.neon-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+  transition: width 0.3s ease;
+}
+
+.neon-underline:hover::after {
+  width: 100%;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

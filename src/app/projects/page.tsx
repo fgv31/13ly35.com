@@ -16,42 +16,49 @@ export default function ProjectsPage() {
       ? projects
       : projects.filter((project) => project.status === filter);
 
+  const filterOptions: Array<{ value: FilterOption; label: string }> = [
+    { value: "all", label: "ALL" },
+    { value: "built", label: "DEPLOYED" },
+    { value: "ongoing", label: "IN_DEV" },
+    { value: "idea", label: "CONCEPT" },
+  ];
+
   return (
-    <div className="min-h-screen bg-dark flex flex-col">
+    <div className="min-h-screen bg-dark cyber-grid flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-16">
-            <p className="text-xs uppercase tracking-[0.2em] text-beige/40 mb-4">04 / Projects</p>
-            <h1 className="text-4xl md:text-6xl font-light text-beige mb-6">
-              Building
+            <p className="font-mono text-xs text-magenta mb-4">[04] // PROJECTS_MODULE</p>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              <span className="text-cyan">BUILD</span> LOG
             </h1>
-            <p className="text-lg text-beige/60 max-w-2xl leading-relaxed">
-              Ideas brought to life, works in progress, and concepts waiting to be built.
+            <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
+              <span className="text-cyan">&gt;</span> Ideas brought to life, works in progress, and concepts waiting to be built.
             </p>
           </header>
 
           {/* Filter Buttons */}
           <div className="flex flex-wrap gap-2 mb-12">
-            {(["all", "built", "ongoing", "idea"] as const).map((option) => (
+            {filterOptions.map((option) => (
               <button
-                key={option}
-                onClick={() => setFilter(option)}
-                className={`px-5 py-2.5 text-sm capitalize transition-all duration-300 ${
-                  filter === option
-                    ? "bg-beige text-dark"
-                    : "bg-transparent text-beige/60 hover:text-beige"
+                key={option.value}
+                onClick={() => setFilter(option.value)}
+                className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
+                  filter === option.value
+                    ? "bg-cyan text-dark border-cyan"
+                    : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
                 }`}
               >
-                {option}
+                {option.label}
               </button>
             ))}
           </div>
 
           {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredProjects.map((project, index) => (
               <div
                 key={project.id}
@@ -67,8 +74,8 @@ export default function ProjectsPage() {
 
           {/* Empty State */}
           {filteredProjects.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-beige/40">No projects in this category yet.</p>
+            <div className="text-center py-20 border border-cyan/10">
+              <p className="font-mono text-white/40">NO_PROJECTS_FOUND</p>
             </div>
           )}
         </div>

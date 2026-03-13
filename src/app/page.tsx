@@ -6,31 +6,31 @@ import Footer from "@/components/layout/Footer";
 
 const navigationCards = [
   {
-    title: "About",
+    title: "ABOUT",
     href: "/about",
     description: "History, experiences, and the journey so far",
     number: "01",
   },
   {
-    title: "Map",
+    title: "MAP",
     href: "/map",
     description: "Places explored and destinations ahead",
     number: "02",
   },
   {
-    title: "Taste",
+    title: "TASTE",
     href: "/taste",
     description: "Curated recommendations across media and objects",
     number: "03",
   },
   {
-    title: "Projects",
+    title: "PROJECTS",
     href: "/projects",
     description: "Ideas built, building, and imagined",
     number: "04",
   },
   {
-    title: "Now",
+    title: "NOW",
     href: "/now",
     description: "Current focus and weekly reflections",
     number: "05",
@@ -39,7 +39,7 @@ const navigationCards = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-dark">
+    <div className="flex min-h-screen flex-col bg-dark cyber-grid scanlines">
       <Header />
 
       <main className="flex-1 pt-20">
@@ -47,25 +47,30 @@ export default function Home() {
         <section className="px-6 py-32 md:py-48">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-4xl">
+              {/* Terminal intro */}
+              <p className="font-mono text-sm text-cyan/60 mb-6">
+                &gt; INITIALIZING SYSTEM...
+              </p>
+
               {/* Main Title */}
-              <h1 className="text-[clamp(3rem,10vw,8rem)] font-light leading-[0.9] tracking-tight text-beige">
-                Creative
+              <h1 className="text-[clamp(3rem,10vw,8rem)] font-bold leading-[0.9] tracking-tight">
+                <span className="text-white">CREATIVE</span>
                 <br />
-                <span className="text-red">Expression</span>
+                <span className="gradient-text">EXPRESSION</span>
               </h1>
 
               {/* Tagline */}
-              <p className="mt-12 max-w-lg text-lg text-beige/60 leading-relaxed">
-                Building digital experiences, exploring the world, and documenting the journey along the way.
+              <p className="mt-12 max-w-lg text-lg text-white/50 leading-relaxed font-mono">
+                <span className="text-magenta">&gt;</span> Building digital experiences, exploring the world, and documenting the journey.
               </p>
 
               {/* CTA */}
               <div className="mt-12 flex items-center gap-8">
                 <Link
                   href="/about"
-                  className="group inline-flex items-center gap-3 text-sm font-medium text-beige"
+                  className="group inline-flex items-center gap-3 font-mono text-sm font-medium text-cyan border border-cyan/50 px-6 py-3 hover:bg-cyan/10 hover:border-cyan transition-all duration-300 box-glow-cyan"
                 >
-                  <span>Explore</span>
+                  <span>EXPLORE_SYSTEM</span>
                   <svg
                     className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                     fill="none"
@@ -81,45 +86,45 @@ export default function Home() {
         </section>
 
         {/* Navigation Cards Grid */}
-        <section className="px-6 py-24 border-t border-beige/5">
+        <section className="px-6 py-24 border-t border-cyan/10">
           <div className="mx-auto max-w-7xl">
-            <div className="grid gap-px bg-beige/5 sm:grid-cols-2 lg:grid-cols-3">
+            <p className="font-mono text-xs text-magenta mb-8">// NAVIGATION_MODULES</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {navigationCards.map((card, index) => (
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="group relative bg-dark p-10 transition-colors duration-500 hover:bg-beige"
+                  className="group relative p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 hover:bg-muted transition-all duration-300 glitch-hover"
                   style={{
                     opacity: 0,
                     animation: `fadeIn 0.6s ease-out ${index * 0.1}s forwards`,
                   }}
                 >
                   {/* Number */}
-                  <span className="text-xs text-beige/20 group-hover:text-dark/30 transition-colors duration-500">
-                    {card.number}
+                  <span className="font-mono text-xs text-cyan/30 group-hover:text-cyan transition-colors duration-300">
+                    [{card.number}]
                   </span>
 
                   {/* Title */}
-                  <h2 className="mt-8 text-2xl font-light text-beige group-hover:text-dark transition-colors duration-500">
+                  <h2 className="mt-6 font-mono text-xl font-bold text-white group-hover:text-cyan transition-colors duration-300">
                     {card.title}
                   </h2>
 
                   {/* Description */}
-                  <p className="mt-3 text-sm text-beige/50 group-hover:text-dark/60 transition-colors duration-500">
+                  <p className="mt-3 text-sm text-white/40 group-hover:text-white/60 transition-colors duration-300">
                     {card.description}
                   </p>
 
                   {/* Arrow */}
-                  <div className="mt-8 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4 text-red opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                  <div className="mt-6 flex items-center gap-2">
+                    <span className="font-mono text-xs text-magenta opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      ENTER &gt;
+                    </span>
                   </div>
+
+                  {/* Corner accent */}
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
                 </Link>
               ))}
             </div>
@@ -129,18 +134,19 @@ export default function Home() {
         {/* Bottom CTA Section */}
         <section className="px-6 py-32">
           <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 p-12 border border-magenta/20 bg-muted/30">
               <div>
-                <h2 className="text-4xl md:text-5xl font-light text-beige">
-                  Let&apos;s connect
+                <p className="font-mono text-xs text-magenta mb-4">// ESTABLISH_CONNECTION</p>
+                <h2 className="text-4xl md:text-5xl font-bold text-white">
+                  LET&apos;S <span className="text-magenta">CONNECT</span>
                 </h2>
-                <p className="mt-4 text-beige/50 max-w-md">
+                <p className="mt-4 text-white/40 max-w-md font-mono text-sm">
                   Open to conversations, collaborations, and new opportunities.
                 </p>
               </div>
               <a
                 href="mailto:hello@13ly35.com"
-                className="inline-flex items-center gap-3 text-sm font-medium text-beige border-b border-beige pb-1 hover:text-red hover:border-red transition-colors duration-300"
+                className="inline-flex items-center gap-3 font-mono text-sm font-medium text-magenta border border-magenta/50 px-6 py-3 hover:bg-magenta/10 hover:border-magenta transition-all duration-300 box-glow-magenta"
               >
                 hello@13ly35.com
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
