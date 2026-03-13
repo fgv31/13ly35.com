@@ -28,6 +28,32 @@ export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const timelineRef = useRef<TimelineHandle>(null);
+  const activePopup = useRef<mapboxgl.Popup | null>(null);
+
+  const showLocationPopup = useCallback((entry: typeof sortedEntries[number]) => {
+    activePopup.current?.remove();
+    if (!map.current) return;
+
+    const cat = entry.category === "live" ? "LIVE" : entry.category === "queued" ? "QUEUED" : "ARCHIVED";
+    const color = entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555" : "#ff8800";
+
+    activePopup.current = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: "bottom",
+      offset: 15,
+      className: "cyber-popup",
+    })
+      .setLngLat(entry.coordinates)
+      .setHTML(`
+        <div class="cyber-popup-inner">
+          <span class="cyber-popup-status" style="color:${color}">[${cat}]</span>
+          <span class="cyber-popup-name">${entry.location.toUpperCase()}</span>
+          ${entry.country ? `<span class="cyber-popup-country">${entry.country}</span>` : ""}
+        </div>
+      `)
+      .addTo(map.current);
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -38,29 +64,64 @@ export default function AboutPage() {
       container: mapContainer.current,
       style: {
         version: 8,
+        glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
         sources: {
-          "osm-tiles": {
-            type: "raster",
-            tiles: [
-              "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            ],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors",
+          "mapbox-streets": {
+            type: "vector",
+            url: "mapbox://mapbox.mapbox-streets-v8",
           },
         },
         layers: [
+          // Background — pure black
           {
-            id: "osm-tiles",
-            type: "raster",
-            source: "osm-tiles",
+            id: "background",
+            type: "background",
+            paint: { "background-color": "#000000" },
+          },
+          // Water
+          {
+            id: "water",
+            type: "fill",
+            source: "mapbox-streets",
+            "source-layer": "water",
+            paint: { "fill-color": "#0a0a0a" },
+          },
+          // Waterways
+          {
+            id: "waterway",
+            type: "line",
+            source: "mapbox-streets",
+            "source-layer": "waterway",
             paint: {
-              "raster-saturation": -1,
-              "raster-brightness-min": 0,
-              "raster-brightness-max": 0.15,
-              "raster-contrast": 0.5,
-              "raster-hue-rotate": 180,
+              "line-color": "#151515",
+              "line-width": 1,
+              "line-opacity": 0.4,
+            },
+          },
+          // Country boundaries
+          {
+            id: "admin-0-boundaries",
+            type: "line",
+            source: "mapbox-streets",
+            "source-layer": "admin",
+            filter: ["==", ["get", "admin_level"], 0],
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": 0.8,
+              "line-opacity": 0.2,
+            },
+          },
+          // State/province boundaries
+          {
+            id: "admin-1-boundaries",
+            type: "line",
+            source: "mapbox-streets",
+            "source-layer": "admin",
+            filter: ["==", ["get", "admin_level"], 1],
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": 0.3,
+              "line-opacity": 0.1,
             },
           },
         ],
@@ -68,8 +129,6 @@ export default function AboutPage() {
       center: [10, 45],
       zoom: 3,
     });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     sortedEntries.forEach((entry, index) => {
       const color = categoryMarkerColors[entry.category];
@@ -103,6 +162,7 @@ export default function AboutPage() {
           zoom: 5,
           duration: 1200,
         });
+        showLocationPopup(entry);
       });
 
       new mapboxgl.Marker(el)
@@ -129,6 +189,7 @@ export default function AboutPage() {
         zoom: 5,
         duration: 2000,
       });
+      showLocationPopup(liveEntry);
     }, 800);
 
     return () => clearTimeout(timer);
@@ -140,7 +201,8 @@ export default function AboutPage() {
       zoom: 5,
       duration: 1200,
     });
-  }, []);
+    showLocationPopup(entry);
+  }, [showLocationPopup]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-dark cyber-grid">
@@ -197,9 +259,8 @@ export default function AboutPage() {
 
           {/* Map panel — fixed, fills height */}
           <div className="md:w-1/2 lg:w-2/5 min-h-0">
-            <div className="relative h-full border border-white/10 overflow-hidden">
+            <div className="h-full overflow-hidden">
               <div ref={mapContainer} className="w-full h-full" />
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-cyan/5 to-transparent" />
             </div>
           </div>
         </div>

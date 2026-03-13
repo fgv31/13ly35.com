@@ -224,6 +224,50 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Cyberpunk map popup */
+.cyber-popup .mapboxgl-popup-content {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  padding: 0;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.15), inset 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.cyber-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+.cyber-popup-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-family: var(--font-mono), monospace;
+}
+
+.cyber-popup-status {
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.cyber-popup-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.cyber-popup-country {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Hide Mapbox branding */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
