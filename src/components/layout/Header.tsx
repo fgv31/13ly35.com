@@ -20,7 +20,7 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="font-mono text-sm font-bold tracking-wider text-cyan hover-glow transition-all duration-300"
+            className="font-mono text-sm font-bold tracking-wider text-white glow-white hover-glow transition-all duration-300"
           >
             &lt;13LY35/&gt;
           </Link>

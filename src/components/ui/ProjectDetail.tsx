@@ -44,15 +44,18 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           </div>
 
           {/* Description */}
-          <div className="mb-10">
+          <div>
             <p className="font-mono text-xs text-cyan/50 mb-3">// DESCRIPTION</p>
             <p className="text-white/70 leading-relaxed max-w-3xl">
               {project.detail || project.description}
             </p>
           </div>
 
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+
           {/* Info grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Tech stack */}
             {project.tech && project.tech.length > 0 && (
               <div>
@@ -86,9 +89,12 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </div>
           </div>
 
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+
           {/* Images placeholder */}
           {project.images && project.images.length > 0 ? (
-            <div className="mb-10">
+            <div>
               <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {project.images.map((img, i) => (
@@ -106,13 +112,16 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
               </div>
             </div>
           ) : (
-            <div className="mb-10">
+            <div>
               <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS</p>
               <div className="border border-dashed border-white/10 py-12 flex items-center justify-center">
                 <p className="font-mono text-xs text-white/20">NO_VISUAL_DATA_AVAILABLE</p>
               </div>
             </div>
           )}
+
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
 
           {/* Links */}
           {(project.github || project.liveUrl) && (
