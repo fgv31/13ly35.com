@@ -25,7 +25,7 @@ export default function NowPage() {
                 EXIT()
               </Link>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
               <span className="text-cyan">LOADING</span>...
             </h1>
           </header>

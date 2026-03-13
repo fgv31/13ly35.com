@@ -43,7 +43,7 @@ export default function TastePage() {
                 EXIT()
               </Link>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
               <span className="text-cyan">CURATED</span> DATA
             </h1>
             <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
