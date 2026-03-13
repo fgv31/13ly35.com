@@ -86,7 +86,7 @@ export default function Home() {
         </section>
 
         {/* Navigation Cards Grid */}
-        <section className="px-6 py-24 border-t border-cyan/10">
+        <section className="px-6 py-24 border-t border-white/10">
           <div className="mx-auto max-w-7xl">
             <p className="font-mono text-xs text-magenta mb-8">// NAVIGATION_MODULES</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

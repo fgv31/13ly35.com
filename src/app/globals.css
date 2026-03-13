@@ -3,8 +3,8 @@
 :root {
   --background: #000000;
   --foreground: #e0e0e0;
-  --accent-cyan: #00f0ff;
-  --accent-magenta: #ff00aa;
+  --accent-cyan: #00ff66;
+  --accent-magenta: #ff8800;
   --accent-yellow: #f0ff00;
   --muted: #111111;
 }
@@ -14,8 +14,8 @@
   --color-foreground: var(--foreground);
   --color-dark: #000000;
   --color-muted: #111111;
-  --color-cyan: #00f0ff;
-  --color-magenta: #ff00aa;
+  --color-cyan: #00ff66;
+  --color-magenta: #ff8800;
   --color-yellow: #f0ff00;
   --color-white: #e0e0e0;
   --font-sans: var(--font-inter);
@@ -39,11 +39,11 @@ body {
 }
 
 .box-glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.05);
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), inset 0 0 20px rgba(0, 255, 102, 0.05);
 }
 
 .box-glow-magenta {
-  box-shadow: 0 0 20px rgba(255, 0, 170, 0.3), inset 0 0 20px rgba(255, 0, 170, 0.05);
+  box-shadow: 0 0 20px rgba(255, 136, 0, 0.3), inset 0 0 20px rgba(255, 136, 0, 0.05);
 }
 
 /* Hover glow transition */
@@ -57,7 +57,7 @@ body {
 
 /* Cyberpunk border */
 .cyber-border {
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  border: 1px solid rgba(0, 255, 102, 0.3);
   position: relative;
 }
 
@@ -91,11 +91,9 @@ body {
   opacity: 0.3;
 }
 
-/* Grid background */
+/* Dot grid background */
 .cyber-grid {
-  background-image:
-    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
   background-size: 50px 50px;
 }
 
@@ -142,7 +140,7 @@ body {
 /* Selection styling */
 ::selection {
   background: var(--accent-magenta);
-  color: var(--background);
+  color: var(--foreground);
 }
 
 /* Smooth fade in */

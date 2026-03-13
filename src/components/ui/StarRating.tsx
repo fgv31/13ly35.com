@@ -13,7 +13,7 @@ export default function StarRating({ rating, maxRating = 5 }: StarRatingProps) {
             key={i}
             className={`w-2 h-2 transition-all duration-300 ${
               isFilled
-                ? "bg-cyan shadow-[0_0_6px_#00f0ff]"
+                ? "bg-cyan shadow-[0_0_6px_#00ff66]"
                 : "bg-white/10"
             }`}
             style={{

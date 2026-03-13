@@ -79,20 +79,20 @@ export default function MapPage() {
       el.style.cssText = `
         width: 12px;
         height: 12px;
-        background: ${place.category === "lived" ? "#ff00aa" : place.category === "visited" ? "#00f0ff" : "#666"};
+        background: ${place.category === "lived" ? "#ff8800" : place.category === "visited" ? "#00ff66" : "#666"};
         border: 2px solid #000000;
         border-radius: 50%;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 0 10px ${place.category === "lived" ? "#ff00aa" : place.category === "visited" ? "#00f0ff" : "#666"};
+        box-shadow: 0 0 10px ${place.category === "lived" ? "#ff8800" : place.category === "visited" ? "#00ff66" : "#666"};
       `;
       el.addEventListener("mouseenter", () => {
         el.style.transform = "scale(1.5)";
-        el.style.boxShadow = `0 0 20px ${place.category === "lived" ? "#ff00aa" : "#00f0ff"}`;
+        el.style.boxShadow = `0 0 20px ${place.category === "lived" ? "#ff8800" : "#00ff66"}`;
       });
       el.addEventListener("mouseleave", () => {
         el.style.transform = "scale(1)";
-        el.style.boxShadow = `0 0 10px ${place.category === "lived" ? "#ff00aa" : place.category === "visited" ? "#00f0ff" : "#666"}`;
+        el.style.boxShadow = `0 0 10px ${place.category === "lived" ? "#ff8800" : place.category === "visited" ? "#00ff66" : "#666"}`;
       });
       el.addEventListener("click", () => {
         setSelectedPlace(place);
@@ -123,7 +123,7 @@ export default function MapPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col">
+    <div className="min-h-screen bg-dark cyber-grid flex flex-col">
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
@@ -159,11 +159,11 @@ export default function MapPage() {
           {/* Legend */}
           <div className="flex gap-6 font-mono text-xs mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff00aa]"></div>
+              <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
               <span className="text-white/50">LIVED</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00f0ff]"></div>
+              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66]"></div>
               <span className="text-white/50">VISITED</span>
             </div>
             <div className="flex items-center gap-2">

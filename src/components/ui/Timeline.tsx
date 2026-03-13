@@ -29,7 +29,7 @@ export default function Timeline({ entries }: TimelineProps) {
               <div
                 className={`absolute left-[-4px] top-1 w-2 h-2 rounded-full transition-all duration-300 ${
                   isExpanded
-                    ? "bg-cyan scale-150 shadow-[0_0_15px_#00f0ff]"
+                    ? "bg-cyan scale-150 shadow-[0_0_15px_#00ff66]"
                     : "bg-cyan/30"
                 }`}
               />

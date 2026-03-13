@@ -45,7 +45,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </div>
 
       {(project.github || project.liveUrl) && (
-        <div className="flex gap-4 pt-4 border-t border-cyan/10">
+        <div className="flex gap-4 pt-4 border-t border-white/10">
           {project.github && (
             <a
               href={project.github}
