@@ -118,73 +118,67 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-dark cyber-grid flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden bg-dark cyber-grid">
       <Header />
 
-      <main className="flex-1 pt-20 flex flex-col">
-        {/* Fixed header area */}
-        <div className="bg-dark/95 backdrop-blur-sm border-b border-white/5 px-6 py-8 sticky top-[65px] z-40">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex items-start justify-between mb-6">
-              <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                </svg>
-                EXIT()
-              </Link>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              THE <span className="text-cyan">JOURNEY</span>
-            </h1>
-            <p className="text-sm text-white/50 max-w-2xl leading-relaxed font-mono mb-6">
-              <span className="text-cyan">&gt;</span> From Verona to Frankfurt to London to Berlin — through central banking, startups, and ambulances.
-            </p>
+      {/* Info bar — fixed below header */}
+      <div className="shrink-0 px-6 pt-24 pb-4 border-b border-white/5">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-start justify-between mb-4">
+            <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+              </svg>
+              EXIT()
+            </Link>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
+            THE <span className="text-cyan">JOURNEY</span>
+          </h1>
+          <p className="text-sm text-white/50 max-w-2xl leading-relaxed font-mono mb-4">
+            <span className="text-cyan">&gt;</span> From Verona to Frankfurt to London to Berlin — through central banking, startups, and ambulances.
+          </p>
 
-            {/* Legend */}
-            <div className="flex gap-6 font-mono text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
-                <span className="text-white/50">LIVE</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
-                <span className="text-white/50">ARCHIVED</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
-                <span className="text-white/30">QUEUED</span>
-              </div>
+          {/* Legend */}
+          <div className="flex gap-6 font-mono text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
+              <span className="text-white/50">LIVE</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
+              <span className="text-white/50">ARCHIVED</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
+              <span className="text-white/30">QUEUED</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content area: Timeline + Sticky Map */}
-        <div className="flex-1 px-6">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col md:flex-row gap-8 py-8">
-              {/* Timeline — scrollable */}
-              <div className="md:w-1/2 lg:w-3/5">
-                <p className="font-mono text-xs text-magenta mb-8">// CLICK A LOCATION TO EXPLORE</p>
-                <Timeline ref={timelineRef} entries={journeyData} onLocationClick={handleLocationClick} />
-              </div>
+      {/* Main content — fills remaining space */}
+      <div className="flex-1 flex min-h-0">
+        <div className="mx-auto max-w-7xl w-full px-6 flex flex-col md:flex-row gap-6 py-4">
+          {/* Timeline panel — scrollable */}
+          <div className="md:w-1/2 lg:w-3/5 overflow-y-auto min-h-0 pr-4 scrollbar-thin">
+            <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
+            <Timeline ref={timelineRef} entries={journeyData} onLocationClick={handleLocationClick} />
+          </div>
 
-              {/* Map — sticky */}
-              <div className="md:w-1/2 lg:w-2/5">
-                <div className="md:sticky md:top-[340px]">
-                  <div className="relative h-[30vh] md:h-[50vh] border border-white/10 overflow-hidden">
-                    <div ref={mapContainer} className="w-full h-full" />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-cyan/5 to-transparent" />
-                  </div>
-                </div>
-              </div>
+          {/* Map panel — fixed, fills height */}
+          <div className="md:w-1/2 lg:w-2/5 min-h-0">
+            <div className="relative h-full border border-white/10 overflow-hidden">
+              <div ref={mapContainer} className="w-full h-full" />
+              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-cyan/5 to-transparent" />
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <Footer />
     </div>
