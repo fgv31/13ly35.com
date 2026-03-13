@@ -91,10 +91,21 @@ body {
   opacity: 0.3;
 }
 
-/* Dot grid background */
+/* Dot grid background — fixed so content scrolls over it */
 .cyber-grid {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
   background-size: 50px 50px;
+  background-attachment: fixed;
+}
+
+/* Blinking LIVE indicator */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.live-blink {
+  animation: livePulse 1.5s ease-in-out infinite;
 }
 
 /* Glitch effect */

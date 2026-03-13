@@ -6,14 +6,21 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import Timeline from "@/components/ui/Timeline";
+import Timeline, { TimelineHandle } from "@/components/ui/Timeline";
 import { journeyData, JourneyEntry } from "@/data/mock/cv";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "YOUR_MAPBOX_TOKEN";
 
+const categoryMarkerColors: Record<string, string> = {
+  live: "#00ff66",
+  archived: "#ff8800",
+  queued: "#555555",
+};
+
 export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const timelineRef = useRef<TimelineHandle>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -44,40 +51,52 @@ export default function AboutPage() {
             paint: {
               "raster-saturation": -1,
               "raster-brightness-min": 0,
-              "raster-brightness-max": 0.25,
-              "raster-contrast": 0.3,
+              "raster-brightness-max": 0.15,
+              "raster-contrast": 0.5,
               "raster-hue-rotate": 180,
             },
           },
         ],
       },
-      center: [10, 42],
+      center: [10, 45],
       zoom: 3,
     });
 
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     // Add markers for all journey locations
-    journeyData.forEach((entry) => {
+    journeyData.forEach((entry, index) => {
+      const color = categoryMarkerColors[entry.category];
+      const isLive = entry.category === "live";
+      const isQueued = entry.category === "queued";
+
       const el = document.createElement("div");
-      const isLived = entry.category === "lived";
       el.style.cssText = `
-        width: 10px;
-        height: 10px;
-        background: ${isLived ? "#00ff66" : "#ff8800"};
-        border: 2px solid #000000;
+        width: ${isLive ? "14px" : isQueued ? "8px" : "10px"};
+        height: ${isLive ? "14px" : isQueued ? "8px" : "10px"};
+        background: ${color};
+        border: 2px solid ${isQueued ? "#333" : "#000"};
         border-radius: 50%;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 0 8px ${isLived ? "#00ff66" : "#ff8800"};
+        box-shadow: 0 0 ${isQueued ? "4px" : "8px"} ${color};
+        ${isLive ? "animation: livePulse 1.5s ease-in-out infinite;" : ""}
       `;
       el.addEventListener("mouseenter", () => {
         el.style.transform = "scale(1.8)";
-        el.style.boxShadow = `0 0 16px ${isLived ? "#00ff66" : "#ff8800"}`;
+        el.style.boxShadow = `0 0 16px ${color}`;
       });
       el.addEventListener("mouseleave", () => {
         el.style.transform = "scale(1)";
-        el.style.boxShadow = `0 0 8px ${isLived ? "#00ff66" : "#ff8800"}`;
+        el.style.boxShadow = `0 0 ${isQueued ? "4px" : "8px"} ${color}`;
+      });
+      el.addEventListener("click", () => {
+        timelineRef.current?.scrollToLocation(index);
+        map.current?.flyTo({
+          center: entry.coordinates,
+          zoom: 5,
+          duration: 1200,
+        });
       });
 
       new mapboxgl.Marker(el)
@@ -94,8 +113,8 @@ export default function AboutPage() {
   const handleLocationClick = useCallback((entry: JourneyEntry) => {
     map.current?.flyTo({
       center: entry.coordinates,
-      zoom: 6,
-      duration: 1500,
+      zoom: 5,
+      duration: 1200,
     });
   }, []);
 
@@ -104,7 +123,7 @@ export default function AboutPage() {
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-12">
             <p className="font-mono text-xs text-magenta mb-4">[01] // JOURNEY_MODULE</p>
@@ -117,27 +136,38 @@ export default function AboutPage() {
           </header>
 
           {/* Legend */}
-          <div className="flex gap-6 font-mono text-xs mb-6">
+          <div className="flex gap-6 font-mono text-xs mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66]"></div>
-              <span className="text-white/50">LIVED</span>
+              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
+              <span className="text-white/50">LIVE</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
-              <span className="text-white/50">VISITED</span>
+              <span className="text-white/50">ARCHIVED</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
+              <span className="text-white/30">QUEUED</span>
             </div>
           </div>
 
-          {/* Map */}
-          <div className="relative h-[40vh] mb-16 border border-white/10 overflow-hidden">
-            <div ref={mapContainer} className="w-full h-full" />
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-cyan/5 to-transparent" />
-          </div>
+          {/* Side-by-side: Timeline + Sticky Map */}
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Timeline — scrollable */}
+            <div className="md:w-1/2 lg:w-3/5">
+              <p className="font-mono text-xs text-magenta mb-8">// CLICK A LOCATION TO EXPLORE</p>
+              <Timeline ref={timelineRef} entries={journeyData} onLocationClick={handleLocationClick} />
+            </div>
 
-          {/* Timeline */}
-          <div className="max-w-3xl">
-            <p className="font-mono text-xs text-magenta mb-8">// CLICK A LOCATION TO EXPLORE</p>
-            <Timeline entries={journeyData} onLocationClick={handleLocationClick} />
+            {/* Map — sticky */}
+            <div className="md:w-1/2 lg:w-2/5">
+              <div className="md:sticky md:top-28">
+                <div className="relative h-[30vh] md:h-[60vh] border border-white/10 overflow-hidden">
+                  <div ref={mapContainer} className="w-full h-full" />
+                  <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-cyan/5 to-transparent" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Back link */}

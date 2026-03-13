@@ -3,7 +3,7 @@ export interface JourneyEntry {
   location: string;
   country: string;
   coordinates: [number, number]; // [lng, lat]
-  category: "lived" | "visited";
+  category: "live" | "archived" | "queued";
   entries: {
     title: string;
     type: "work" | "education" | "personal" | "volunteer";
@@ -17,7 +17,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Berlin",
     country: "Germany",
     coordinates: [13.405, 52.52],
-    category: "lived",
+    category: "live",
     entries: [
       {
         title: "Senior Risk Specialist — Trade Republic",
@@ -36,7 +36,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Building",
     country: "",
     coordinates: [11.0, 45.44],
-    category: "lived",
+    category: "archived",
     entries: [
       {
         title: "Co-Founder — CRUBSTER",
@@ -55,7 +55,7 @@ export const journeyData: JourneyEntry[] = [
     location: "London",
     country: "UK",
     coordinates: [-0.1276, 51.5074],
-    category: "lived",
+    category: "archived",
     entries: [
       {
         title: "MSc Business Analytics — Imperial College London",
@@ -74,7 +74,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Frankfurt",
     country: "Germany",
     coordinates: [8.6821, 50.1109],
-    category: "lived",
+    category: "archived",
     entries: [
       {
         title: "Analyst — European Central Bank",
@@ -98,7 +98,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Düsseldorf",
     country: "Germany",
     coordinates: [6.7735, 51.2277],
-    category: "visited",
+    category: "archived",
     entries: [
       {
         title: "Secondment — Deutsche Bundesbank",
@@ -112,7 +112,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Madrid",
     country: "Spain",
     coordinates: [-3.7038, 40.4168],
-    category: "visited",
+    category: "archived",
     entries: [
       {
         title: "Secondment — Banco de España",
@@ -126,7 +126,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Shanghai",
     country: "China",
     coordinates: [121.4737, 31.2304],
-    category: "visited",
+    category: "archived",
     entries: [
       {
         title: "Exchange Semester — SAIF, Shanghai Jiao Tong University",
@@ -140,7 +140,7 @@ export const journeyData: JourneyEntry[] = [
     location: "New York City",
     country: "USA",
     coordinates: [-74.006, 40.7128],
-    category: "visited",
+    category: "archived",
     entries: [
       {
         title: "Head of Delegation — National Model United Nations",
@@ -154,7 +154,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Milan",
     country: "Italy",
     coordinates: [9.19, 45.4642],
-    category: "lived",
+    category: "archived",
     entries: [
       {
         title: "BSc Economics & Finance — Università Bocconi",
@@ -168,7 +168,7 @@ export const journeyData: JourneyEntry[] = [
     location: "Paragould, Arkansas",
     country: "USA",
     coordinates: [-90.5023, 36.0584],
-    category: "visited",
+    category: "archived",
     entries: [
       {
         title: "Exchange Year — Paragould High School",
@@ -182,12 +182,54 @@ export const journeyData: JourneyEntry[] = [
     location: "Verona",
     country: "Italy",
     coordinates: [10.9916, 45.4384],
-    category: "lived",
+    category: "archived",
     entries: [
       {
         title: "Born — April 2, 1993",
         type: "personal",
         description: "The same day Philip Morris slashed Marlboro prices by 20%, triggering 'Marlboro Friday' and reshaping brand marketing forever. A fitting start for someone who'd end up in risk.",
+      },
+    ],
+  },
+  {
+    period: "PENDING",
+    location: "Tokyo",
+    country: "Japan",
+    coordinates: [139.6917, 35.6895],
+    category: "queued",
+    entries: [
+      {
+        title: "Neon & Noise",
+        type: "personal",
+        description: "Akihabara, Shibuya, ramen at 3am. The original cyberpunk city.",
+      },
+    ],
+  },
+  {
+    period: "PENDING",
+    location: "Seoul",
+    country: "South Korea",
+    coordinates: [126.978, 37.5665],
+    category: "queued",
+    entries: [
+      {
+        title: "The Grid",
+        type: "personal",
+        description: "Street food, tech culture, and Gangnam neon.",
+      },
+    ],
+  },
+  {
+    period: "PENDING",
+    location: "Reykjavik",
+    country: "Iceland",
+    coordinates: [-21.9426, 64.1466],
+    category: "queued",
+    entries: [
+      {
+        title: "Edge of the Map",
+        type: "personal",
+        description: "Northern lights, volcanic landscapes, end-of-the-world vibes.",
       },
     ],
   },
