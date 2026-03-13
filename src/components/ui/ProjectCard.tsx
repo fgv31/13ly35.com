@@ -8,13 +8,17 @@ const statusStyles: Record<ProjectStatus, { color: string; label: string }> = {
 
 interface ProjectCardProps {
   project: Project;
+  onClick?: () => void;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const status = statusStyles[project.status];
 
   return (
-    <div className="group p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 transition-all duration-300 relative">
+    <button
+      onClick={onClick}
+      className="group p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 transition-all duration-300 relative w-full text-left cursor-pointer"
+    >
       {/* Corner accents */}
       <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
       <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
@@ -33,7 +37,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {project.description}
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2">
         {project.tags.map((tag) => (
           <span
             key={tag}
@@ -43,31 +47,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </span>
         ))}
       </div>
-
-      {(project.github || project.liveUrl) && (
-        <div className="flex gap-4 pt-4 border-t border-white/10">
-          {project.github && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs text-white/40 hover:text-cyan transition-colors duration-300"
-            >
-              [GITHUB]
-            </a>
-          )}
-          {project.liveUrl && (
-            <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs text-white/40 hover:text-magenta transition-colors duration-300"
-            >
-              [LIVE]
-            </a>
-          )}
-        </div>
-      )}
-    </div>
+    </button>
   );
 }

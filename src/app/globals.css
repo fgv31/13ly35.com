@@ -286,6 +286,7 @@ body {
   display: none !important;
 }
 
+
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));

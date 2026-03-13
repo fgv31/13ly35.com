@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import CyberLoader from "@/components/ui/CyberLoader";
 
 export default function NowPage() {
   return (
@@ -26,50 +27,28 @@ export default function NowPage() {
               </Link>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
-              <span className="text-cyan">LOADING</span>...
+              LIVE <span className="text-cyan">FEED</span>
             </h1>
             <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
               <span className="text-cyan">&gt;</span> Weekly moodboard — my routine, mood, and thoughts on the world.
             </p>
           </header>
 
-          {/* WIP content — centered */}
-          <div className="max-w-2xl mx-auto text-center">
-            {/* Status indicator */}
-            <div className="mb-12">
-              <div className="inline-flex items-center gap-3 border border-cyan/30 px-6 py-3 bg-muted/50">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan"></span>
-                </span>
-                <span className="font-mono text-sm text-cyan">SYSTEM_BUILDING</span>
-              </div>
-            </div>
+          {/* Loader + terminal */}
+          <div className="max-w-xl">
+            <CyberLoader label="NOW_MODULE_SYNC" />
 
-            {/* Terminal output */}
-            <div className="border border-cyan/20 bg-dark/80 p-6 text-left font-mono text-sm">
-              <p className="text-cyan/60">$ connecting --to obsidian</p>
+            <div className="border border-cyan/20 bg-dark/80 p-6 font-mono text-sm mt-8">
+              <p className="text-cyan/60">$ now --sync --source obsidian</p>
               <p className="text-white/40 mt-2">Establishing secure connection...</p>
-              <p className="text-yellow mt-1">⚠ Module under development</p>
-              <p className="text-white/40 mt-2 cursor-blink">Waiting for data sync</p>
+              <p className="text-magenta mt-1">× Pipeline interrupted — module under development</p>
+              <p className="text-white/20 mt-2 cursor-blink">Retry scheduled</p>
             </div>
           </div>
         </div>
       </main>
 
       <Footer />
-
-      <style jsx>{`
-        @keyframes ping {
-          75%, 100% {
-            transform: scale(2);
-            opacity: 0;
-          }
-        }
-        .animate-ping {
-          animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-      `}</style>
     </div>
   );
 }

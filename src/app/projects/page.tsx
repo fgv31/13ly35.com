@@ -6,16 +6,22 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { projects, type ProjectStatus } from "@/data/mock/projects";
 import ProjectCard from "@/components/ui/ProjectCard";
+import ProjectDetail from "@/components/ui/ProjectDetail";
 
 type FilterOption = "all" | ProjectStatus;
 
 export default function ProjectsPage() {
   const [filter, setFilter] = useState<FilterOption>("all");
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
   const filteredProjects =
     filter === "all"
       ? projects
       : projects.filter((project) => project.status === filter);
+
+  const activeProject = activeProjectId
+    ? projects.find((p) => p.id === activeProjectId) ?? null
+    : null;
 
   const filterOptions: Array<{ value: FilterOption; label: string }> = [
     { value: "all", label: "ALL" },
@@ -45,50 +51,75 @@ export default function ProjectsPage() {
               </Link>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
-              <span className="text-cyan">BUILD</span> LOG
+              {activeProject ? (
+                <>
+                  <span className="text-cyan">BUILD</span> LOG
+                  <span className="text-white/30">://</span>{" "}
+                  <span className="text-magenta">{activeProject.title.toUpperCase()}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-cyan">BUILD</span> LOG
+                </>
+              )}
             </h1>
-            <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
-              <span className="text-cyan">&gt;</span> Ideas brought to life, works in progress, and concepts waiting to be built.
-            </p>
+            {!activeProject && (
+              <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
+                <span className="text-cyan">&gt;</span> Ideas brought to life, works in progress, and concepts waiting to be built.
+              </p>
+            )}
           </header>
 
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-2 mb-12">
-            {filterOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setFilter(option.value)}
-                className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
-                  filter === option.value
-                    ? "bg-cyan text-dark border-cyan"
-                    : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredProjects.map((project, index) => (
-              <div
-                key={project.id}
-                style={{
-                  opacity: 0,
-                  animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`,
-                }}
-              >
-                <ProjectCard project={project} />
+          {activeProject ? (
+            /* Expanded project detail */
+            <ProjectDetail
+              project={activeProject}
+              onClose={() => setActiveProjectId(null)}
+            />
+          ) : (
+            <>
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap gap-2 mb-12">
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setFilter(option.value)}
+                    className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
+                      filter === option.value
+                        ? "bg-cyan text-dark border-cyan"
+                        : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Empty State */}
-          {filteredProjects.length === 0 && (
-            <div className="text-center py-20 border border-cyan/10">
-              <p className="font-mono text-white/40">NO_PROJECTS_FOUND</p>
-            </div>
+              {/* Projects Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredProjects.map((project, index) => (
+                  <div
+                    key={project.id}
+                    style={{
+                      opacity: 0,
+                      animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`,
+                    }}
+                  >
+                    <ProjectCard
+                      project={project}
+                      onClick={() => setActiveProjectId(project.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Empty State */}
+              {filteredProjects.length === 0 && (
+                <div className="text-center py-20 border border-cyan/10">
+                  <p className="font-mono text-white/40">NO_PROJECTS_FOUND</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
