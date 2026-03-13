@@ -80,7 +80,7 @@ export default function MapPage() {
         width: 12px;
         height: 12px;
         background: ${place.category === "lived" ? "#ff00aa" : place.category === "visited" ? "#00f0ff" : "#666"};
-        border: 2px solid #0a0a0f;
+        border: 2px solid #000000;
         border-radius: 50%;
         cursor: pointer;
         transition: all 0.3s ease;
