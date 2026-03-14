@@ -16,7 +16,16 @@ const pressStart = localFont({
 
 export const metadata: Metadata = {
   title: "13ly35",
-  description: "Personal website - Creative expression meets professional presence",
+  description: "FV - Building stuff and documenting my Journey",
+  openGraph: {
+    title: "FV - Building stuff and documenting my Journey",
+    description: "FV - Building stuff and documenting my Journey",
+    siteName: "13ly35",
+  },
+  twitter: {
+    title: "FV - Building stuff and documenting my Journey",
+    description: "FV - Building stuff and documenting my Journey",
+  },
 };
 
 export default function RootLayout({

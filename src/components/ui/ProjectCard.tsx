@@ -28,6 +28,9 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         <span className={`font-mono text-xs ${status.color}`}>
           [{status.label}]
         </span>
+        {project.year && (
+          <span className="font-mono text-xs text-white/25">{project.year}</span>
+        )}
       </div>
 
       <h3 className="text-xl font-bold text-white group-hover:text-cyan transition-colors duration-300 mb-3">

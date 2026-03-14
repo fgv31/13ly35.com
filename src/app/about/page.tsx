@@ -321,8 +321,8 @@ export default function AboutPage() {
                   <span className="text-white/50">ARCHIVED</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
-                  <span className="text-white/30">QUEUED</span>
+                  <div className="w-2.5 h-2.5 bg-white/40 rounded-full border border-white/20"></div>
+                  <span className="text-white/50">QUEUED</span>
                 </div>
               </div>
             </header>

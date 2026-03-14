@@ -18,7 +18,6 @@ export default function TastePage() {
     { value: "objects", label: "OBJECTS", activeClass: "bg-yellow text-dark border-yellow" },
     { value: "people", label: "PEOPLE", activeClass: "bg-yellow text-dark border-yellow" },
     { value: "food", label: "FOOD", activeClass: "bg-yellow text-dark border-yellow" },
-    { value: "books", label: "BOOKS", activeClass: "bg-yellow text-dark border-yellow" },
   ];
 
   const filteredRecommendations = recommendations.filter((rec) => {

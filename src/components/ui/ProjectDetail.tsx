@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import type { Project, ProjectStatus } from "@/data/mock/projects";
 
 const statusStyles: Record<ProjectStatus, { color: string; label: string; bg: string }> = {
@@ -16,9 +17,104 @@ interface ProjectDetailProps {
 
 export default function ProjectDetail({ project, onClose }: ProjectDetailProps) {
   const status = statusStyles[project.status];
+  const [fullscreenImg, setFullscreenImg] = useState<string | null>(null);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreenImg(null);
+      if (!fullscreenImg || !project.images) return;
+      const idx = project.images.indexOf(fullscreenImg);
+      if (e.key === "ArrowRight" && idx < project.images.length - 1) {
+        setFullscreenImg(project.images[idx + 1]);
+      }
+      if (e.key === "ArrowLeft" && idx > 0) {
+        setFullscreenImg(project.images[idx - 1]);
+      }
+    },
+    [fullscreenImg, project.images]
+  );
+
+  useEffect(() => {
+    if (fullscreenImg) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [fullscreenImg, handleKeyDown]);
+
+  const currentIdx = fullscreenImg && project.images ? project.images.indexOf(fullscreenImg) : -1;
+  const hasPrev = currentIdx > 0;
+  const hasNext = project.images ? currentIdx < project.images.length - 1 : false;
 
   return (
     <div className="animate-fadeIn">
+      {/* Fullscreen overlay */}
+      {fullscreenImg && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={() => setFullscreenImg(null)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setFullscreenImg(null)}
+            className="absolute top-6 right-6 font-mono text-xs text-white/50 hover:text-magenta transition-colors z-10 flex items-center gap-2"
+          >
+            ESC
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Page counter */}
+          {project.images && project.images.length > 1 && (
+            <div className="absolute top-6 left-6 font-mono text-xs text-white/40">
+              {currentIdx + 1} / {project.images.length}
+            </div>
+          )}
+
+          {/* Prev arrow */}
+          {hasPrev && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFullscreenImg(project.images![currentIdx - 1]);
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/40 hover:text-cyan transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          {/* Image */}
+          <img
+            src={fullscreenImg}
+            alt="Fullscreen view"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Next arrow */}
+          {hasNext && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFullscreenImg(project.images![currentIdx + 1]);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/40 hover:text-cyan transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Detail container */}
       <div className="border border-cyan/20 bg-muted/50 relative mx-4 md:mx-8">
         {/* Content */}
@@ -93,22 +189,41 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
           <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
 
-          {/* Images placeholder */}
+          {/* Screenshots */}
           {project.images && project.images.length > 0 ? (
             <div>
-              <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS — CLICK TO EXPAND</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {project.images.map((img, i) => (
-                  <div
+                  <button
                     key={i}
-                    className="aspect-video border border-cyan/10 bg-dark/50 overflow-hidden"
+                    onClick={() => setFullscreenImg(img)}
+                    className="aspect-video border border-cyan/10 hover:border-cyan/40 bg-dark/50 overflow-hidden transition-all duration-300 cursor-pointer group relative"
                   >
                     <img
                       src={img}
-                      alt={`${project.title} screenshot ${i + 1}`}
-                      className="w-full h-full object-cover"
+                      alt={`${project.title} slide ${i + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                  </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-white/0 group-hover:text-white/60 transition-colors duration-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                        />
+                      </svg>
+                    </div>
+                    <span className="absolute bottom-1 right-2 font-mono text-[9px] text-white/30">
+                      {i + 1}
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>

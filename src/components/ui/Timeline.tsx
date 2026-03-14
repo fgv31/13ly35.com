@@ -29,7 +29,7 @@ const typeColors: Record<string, string> = {
 const categoryConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   live: { label: "LIVE", color: "text-cyan", dotColor: "bg-cyan" },
   archived: { label: "ARCHIVED", color: "text-white/30", dotColor: "bg-white/40" },
-  queued: { label: "QUEUED", color: "text-white/20", dotColor: "bg-white/20" },
+  queued: { label: "QUEUED", color: "text-white/50", dotColor: "bg-white/40" },
 };
 
 const Timeline = forwardRef<TimelineHandle, TimelineProps>(
@@ -69,7 +69,7 @@ const Timeline = forwardRef<TimelineHandle, TimelineProps>(
               <div
                 key={index}
                 ref={(el) => { itemRefs.current[index] = el; }}
-                className={`relative pl-12 pb-10 last:pb-0 ${isQueued ? "opacity-40" : ""}`}
+                className={`relative pl-12 pb-10 last:pb-0 ${isQueued ? "opacity-70" : ""}`}
               >
                 {/* Timeline marker */}
                 <div
@@ -103,7 +103,7 @@ const Timeline = forwardRef<TimelineHandle, TimelineProps>(
 
                   <div className="flex items-baseline gap-2">
                     <h3 className={`text-2xl font-bold transition-colors duration-300 ${
-                      isExpanded ? "text-cyan glow-cyan" : isQueued ? "text-white/30 group-hover:text-white/50" : "text-white group-hover:text-cyan"
+                      isExpanded ? "text-cyan glow-cyan" : isQueued ? "text-white/50 group-hover:text-white/70" : "text-white group-hover:text-cyan"
                     }`}>
                       {entry.location}
                     </h3>
