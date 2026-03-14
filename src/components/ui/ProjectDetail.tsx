@@ -6,6 +6,7 @@ const statusStyles: Record<ProjectStatus, { color: string; label: string; bg: st
   idea: { color: "text-yellow", label: "CONCEPT", bg: "bg-yellow/10 border-yellow/30" },
   built: { color: "text-cyan", label: "DEPLOYED", bg: "bg-cyan/10 border-cyan/30" },
   ongoing: { color: "text-magenta", label: "IN_DEV", bg: "bg-magenta/10 border-magenta/30" },
+  deleted: { color: "text-red-500", label: "INTERRUPTED", bg: "bg-red-500/10 border-red-500/30" },
 };
 
 interface ProjectDetailProps {

@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/about", label: "JOURNEY" },
-  { href: "/taste", label: "TASTE" },
-  { href: "/projects", label: "PROJECTS" },
-  { href: "/now", label: "NOW" },
+  { href: "/taste", label: "PICKS" },
+  { href: "/projects", label: "PATHS" },
+  { href: "/now", label: "FEED" },
 ];
 
 export default function Header() {
@@ -47,8 +47,10 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-cyan p-2"
+            className="md:hidden text-cyan p-3 -mr-3 relative z-50"
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+            type="button"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {menuOpen ? (

@@ -4,6 +4,7 @@ const statusStyles: Record<ProjectStatus, { color: string; label: string }> = {
   idea: { color: "text-yellow", label: "CONCEPT" },
   built: { color: "text-cyan", label: "DEPLOYED" },
   ongoing: { color: "text-magenta", label: "IN_DEV" },
+  deleted: { color: "text-red-500", label: "INTERRUPTED" },
 };
 
 interface ProjectCardProps {

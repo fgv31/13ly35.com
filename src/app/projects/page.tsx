@@ -28,6 +28,7 @@ export default function ProjectsPage() {
     { value: "built", label: "DEPLOYED" },
     { value: "ongoing", label: "IN_DEV" },
     { value: "idea", label: "CONCEPT" },
+    { value: "deleted", label: "INTERRUPTED" },
   ];
 
   return (
@@ -39,7 +40,7 @@ export default function ProjectsPage() {
           {/* Header */}
           <header className="mb-16">
             <div className="flex items-start justify-between mb-4">
-              <p className="font-mono text-xs text-magenta">[03] // PROJECTS_MODULE</p>
+              <p className="font-mono text-xs text-magenta">[03] // PATHS_MODULE</p>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
@@ -53,13 +54,13 @@ export default function ProjectsPage() {
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
               {activeProject ? (
                 <>
-                  <span className="text-cyan">BUILD</span> LOG
+                  <span className="text-cyan">PATH</span>
                   <span className="text-white/30">://</span>{" "}
                   <span className="text-magenta">{activeProject.title.toUpperCase()}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-cyan">BUILD</span> LOG
+                  <span className="text-cyan">ALL</span> PATHS
                 </>
               )}
             </h1>

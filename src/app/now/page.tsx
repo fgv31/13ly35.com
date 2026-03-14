@@ -15,7 +15,7 @@ export default function NowPage() {
           {/* Header */}
           <header className="mb-16">
             <div className="flex items-start justify-between mb-4">
-              <p className="font-mono text-xs text-magenta">[04] // NOW_MODULE</p>
+              <p className="font-mono text-xs text-magenta">[04] // FEED_MODULE</p>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"

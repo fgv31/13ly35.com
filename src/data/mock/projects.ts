@@ -1,4 +1,4 @@
-export type ProjectStatus = "idea" | "built" | "ongoing";
+export type ProjectStatus = "idea" | "built" | "ongoing" | "deleted";
 
 export interface Project {
   id: string;
@@ -83,5 +83,27 @@ export const projects: Project[] = [
     tags: ["games", "typescript", "pixel-art"],
     tech: ["TypeScript", "Canvas API", "Web Audio"],
     year: "2026",
+  },
+  {
+    id: "7",
+    title: "CRUBSTER",
+    description: "Startup co-founded and run for three years — wore every hat",
+    detail:
+      "Co-founded a startup that aimed to disrupt how people discover local experiences. Built the product, managed the team, handled fundraising, marketing, and operations. Three years of intense learning, pivots, and growth. Eventually shut down — but the lessons stuck.",
+    status: "deleted",
+    tags: ["startup", "product", "entrepreneurship"],
+    tech: ["React", "Node.js", "PostgreSQL", "AWS"],
+    year: "2021–2024",
+  },
+  {
+    id: "8",
+    title: "Crypto Trading Bot",
+    description: "Algorithmic trading bot for cryptocurrency markets",
+    detail:
+      "Built a trading bot that monitored crypto markets and executed trades based on technical indicators and sentiment analysis. Ran live for a few months, made some gains, took some losses. Pulled the plug when the risk/reward ratio stopped making sense. Good exercise in systems thinking and real-time data processing.",
+    status: "deleted",
+    tags: ["crypto", "trading", "automation"],
+    tech: ["Python", "Binance API", "pandas", "Redis"],
+    year: "2022",
   },
 ];

@@ -22,7 +22,7 @@ export default function TastePage() {
 
   const filteredRecommendations = recommendations.filter((rec) => {
     if (selectedCategory !== "all" && rec.category !== selectedCategory) return false;
-    if (exactRating > 0 && rec.rating !== exactRating) return false;
+    if (exactRating > 0 && rec.rating < exactRating) return false;
     return true;
   });
 
@@ -35,7 +35,7 @@ export default function TastePage() {
           {/* Header */}
           <header className="mb-16">
             <div className="flex items-start justify-between mb-4">
-              <p className="font-mono text-xs text-magenta">[02] // TASTE_MODULE</p>
+              <p className="font-mono text-xs text-magenta">[02] // PICKS_MODULE</p>
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
@@ -47,7 +47,7 @@ export default function TastePage() {
               </Link>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
-              <span className="text-cyan">CURATED</span> DATA
+              MY <span className="text-cyan">PICKS</span>
             </h1>
             <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono">
               <span className="text-cyan">&gt;</span> Things that resonate. Movies, music, objects, and places worth experiencing.
@@ -83,7 +83,7 @@ export default function TastePage() {
                 >
                   <div
                     className={`w-3 h-3 transition-all duration-300 ${
-                      star === exactRating
+                      exactRating > 0 && star <= exactRating
                         ? "bg-cyan shadow-[0_0_6px_#00ff66]"
                         : "bg-white/10 hover:bg-white/20"
                     }`}
