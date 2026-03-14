@@ -137,8 +137,8 @@ export default function AboutPage() {
             filter: ["!", ["coalesce", ["get", "class"], false]],
             paint: {
               "line-color": "#ffffff",
-              "line-width": 0.6,
-              "line-opacity": 0.2,
+              "line-width": 0.8,
+              "line-opacity": 0.45,
               "line-dasharray": [4, 3],
             },
           },
@@ -151,8 +151,8 @@ export default function AboutPage() {
             filter: ["==", ["get", "admin_level"], 0],
             paint: {
               "line-color": "#ffffff",
-              "line-width": 0.7,
-              "line-opacity": 0.2,
+              "line-width": 0.9,
+              "line-opacity": 0.4,
               "line-dasharray": [6, 4],
             },
           },
@@ -165,8 +165,8 @@ export default function AboutPage() {
             filter: ["==", ["get", "admin_level"], 1],
             paint: {
               "line-color": "#ffffff",
-              "line-width": 0.3,
-              "line-opacity": 0.1,
+              "line-width": 0.5,
+              "line-opacity": 0.25,
               "line-dasharray": [3, 3],
             },
           },

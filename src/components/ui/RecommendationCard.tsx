@@ -14,15 +14,15 @@ export default function RecommendationCard({ recommendation, isExpanded, onClick
       className={`group w-full h-full text-left p-6 bg-muted/50 border transition-all duration-500 relative ${
         isExpanded
           ? "border-cyan/50 bg-muted/80"
-          : "border-cyan/10 hover:border-cyan/50"
+          : "border-cyan/30 md:border-cyan/10 hover:border-cyan/50"
       }`}
     >
       {/* Corner accents */}
       <div className={`absolute top-0 right-0 w-4 h-4 border-t border-r transition-colors duration-300 ${
-        isExpanded ? "border-cyan/50" : "border-cyan/20 group-hover:border-cyan/50"
+        isExpanded ? "border-cyan/50" : "border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50"
       }`} />
       <div className={`absolute bottom-0 left-0 w-4 h-4 border-b border-l transition-colors duration-300 ${
-        isExpanded ? "border-cyan/50" : "border-cyan/20 group-hover:border-cyan/50"
+        isExpanded ? "border-cyan/50" : "border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50"
       }`} />
 
       <div className="flex items-start justify-between gap-4 mb-4">

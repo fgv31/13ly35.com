@@ -18,11 +18,11 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   return (
     <button
       onClick={onClick}
-      className="group p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 transition-all duration-300 relative w-full text-left cursor-pointer"
+      className="group p-8 bg-muted/50 border border-cyan/30 md:border-cyan/10 hover:border-cyan/50 transition-all duration-300 relative w-full text-left cursor-pointer"
     >
       {/* Corner accents */}
-      <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
-      <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+      <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+      <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
 
       <div className="flex items-start justify-between gap-4 mb-4">
         <span className={`font-mono text-xs ${status.color}`}>
@@ -42,7 +42,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         {project.tags.map((tag) => (
           <span
             key={tag}
-            className="font-mono text-xs text-cyan/60 border border-cyan/20 px-2 py-1"
+            className="font-mono text-xs text-cyan/60 border border-cyan/30 md:border-cyan/20 px-2 py-1"
           >
             #{tag}
           </span>

@@ -299,7 +299,7 @@ export default function Home() {
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="group relative p-6 sm:p-8 bg-muted/50 border border-cyan/10 hover:border-cyan/50 hover:bg-muted transition-all duration-300 glitch-hover"
+                  className="group relative p-6 sm:p-8 bg-muted/50 border border-cyan/30 md:border-cyan/10 hover:border-cyan/50 hover:bg-muted transition-all duration-300 glitch-hover"
                   style={{
                     opacity: 0,
                     animation: `fadeIn 0.6s ease-out ${index * 0.1}s forwards`,
@@ -331,8 +331,8 @@ export default function Home() {
                   </div>
 
                   {/* Corner accent */}
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-cyan/40 md:border-cyan/20 group-hover:border-cyan/50 transition-colors duration-300" />
                 </Link>
               ))}
             </div>
