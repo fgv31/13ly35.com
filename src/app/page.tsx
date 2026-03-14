@@ -139,14 +139,14 @@ export default function Home() {
 
               {/* Main Title */}
               <h1 className="text-[clamp(3rem,10vw,8rem)] font-bold leading-[0.9] tracking-tight">
-                <span className="text-white">CREATIVE</span>
+                <span className="text-white">FRANCESCO</span>
                 <br />
-                <span className="gradient-text">EXPRESSION</span>
+                <span className="gradient-text">VILLANI</span>
               </h1>
 
               {/* Tagline */}
               <p className="mt-12 max-w-lg text-lg text-white/50 leading-relaxed font-mono">
-                <span className="text-magenta">&gt;</span> Building digital experiences, exploring the world, and documenting the journey.
+                <span className="text-magenta">&gt;</span> Building stuff, exploring the world, and documenting the journey.
               </p>
 
               {/* CTA */}
