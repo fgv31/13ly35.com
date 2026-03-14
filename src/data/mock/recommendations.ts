@@ -1,4 +1,4 @@
-export type Category = "movies" | "music" | "objects" | "people" | "places" | "books";
+export type Category = "movies" | "music" | "objects" | "people" | "food" | "books";
 
 export interface Recommendation {
   id: string;
@@ -48,13 +48,13 @@ export const recommendations: Recommendation[] = [
   { id: "p5", title: "Linus Tech Tips", category: "people", rating: 4, description: "Tech entertainment empire", detail: "The biggest tech channel for a reason. From server room builds to GPU reviews, LTT covers everything with production quality that keeps getting better.", link: "https://www.youtube.com/@LinusTechTips", linkLabel: "YOUTUBE" },
   { id: "p6", title: "3Blue1Brown", category: "people", rating: 5, description: "Math, visualized beautifully", detail: "Grant Sanderson makes calculus, linear algebra, and neural networks click through stunning animations. The kind of channel that makes you wish school was like this.", link: "https://www.youtube.com/@3blue1brown", linkLabel: "YOUTUBE" },
 
-  // ── PLACES ─────────────────────────────────────────
-  { id: "pl1", title: "Neapolitan Pizza", category: "places", rating: 5, description: "The original and the best", detail: "San Marzano tomatoes, fior di latte, fresh basil, 90 seconds in a 450°C wood-fired oven. Nothing else comes close. The Margherita is perfection in simplicity." },
-  { id: "pl2", title: "Ramen", category: "places", rating: 5, description: "Soul in a bowl", detail: "Tonkotsu broth simmered for 18 hours, chashu pork, ajitama egg, spring onions. The depth of flavor is unmatched. Every bowl tells a story." },
-  { id: "pl3", title: "Tiramisu", category: "places", rating: 5, description: "Italian comfort perfected", detail: "Mascarpone, espresso-soaked savoiardi, cocoa. The simplest ingredients combined with technique and time. No baking required, just patience." },
-  { id: "pl4", title: "Tacos al Pastor", category: "places", rating: 5, description: "Mexico City street magic", detail: "Marinated pork carved from a trompo, pineapple, cilantro, onion, a squeeze of lime on a corn tortilla. The perfect street food doesn't exi—" },
-  { id: "pl5", title: "Sushi Omakase", category: "places", rating: 5, description: "Trust the chef", detail: "The art of surrender. Each piece placed deliberately, eaten immediately. Decades of mastery in every cut. The rice matters more than the fish." },
-  { id: "pl6", title: "Carbonara", category: "places", rating: 5, description: "Four ingredients, infinite debate", detail: "Guanciale, pecorino, egg yolks, black pepper. No cream. Ever. The emulsion is the magic — silky, rich, and gone in minutes." },
+  // ── FOOD ───────────────────────────────────────────
+  { id: "f1", title: "Cocolo Ramen", category: "food", rating: 5, description: "Berlin's best ramen", detail: "Authentic tonkotsu broth simmered for hours, perfectly chewy noodles, melt-in-your-mouth chashu. The Kreuzberg location has the best vibe — tiny, packed, and worth the wait.", link: "https://kuchi.de/en/cocolo-ramen/", linkLabel: "WEBSITE" },
+  { id: "f2", title: "Malafemmena", category: "food", rating: 5, description: "Neapolitan pizza in Berlin", detail: "The real deal — soft, charred, leopard-spotted crust straight from a wood-fired oven. The Margherita alone is worth the trip. Multiple locations across Berlin, all consistently excellent.", link: "https://www.malafemmena.com", linkLabel: "WEBSITE" },
+  { id: "f3", title: "Markthalle Neun", category: "food", rating: 4, description: "Street food market, Kreuzberg", detail: "Thursday is Street Food Thursday — dozens of stalls from around the world under one historic roof. Great for exploring, tasting, and discovering new flavors. The energy is infectious.", link: "https://markthalleneun.de", linkLabel: "WEBSITE" },
+  { id: "f4", title: "Ora", category: "food", rating: 5, description: "Former pharmacy turned café", detail: "Beautiful space in Kreuzberg with incredible brunch and cakes. The interior is stunning — old pharmacy shelves, high ceilings, and natural light. Coffee is top-notch.", link: "https://www.oraberlin.de", linkLabel: "WEBSITE" },
+  { id: "f5", title: "Burgermeister", category: "food", rating: 4, description: "Burgers under the U-Bahn", detail: "Housed in a former public toilet under the Schlesisches Tor U-Bahn tracks. Sounds weird, tastes incredible. The Meisterburger with crispy onions is the move.", link: "https://burger-meister.de", linkLabel: "WEBSITE" },
+  { id: "f6", title: "Mustafa's Gemüse Kebap", category: "food", rating: 5, description: "The legendary kebab", detail: "Yes, the queue is long. Yes, it's worth it. Roasted vegetables, secret sauce, perfectly spiced meat in fresh bread. A Berlin institution for a reason.", link: "https://mustafas.de", linkLabel: "WEBSITE" },
 
   // ── BOOKS ─────────────────────────────────────────
   { id: "b1", title: "Sapiens", category: "books", rating: 5, description: "History of everything", detail: "Yuval Noah Harari traces the entire arc of humanity — from cognitive revolution to silicon. Changes how you see civilizations, money, and religion. A book that rewires your worldview.", link: "https://www.goodreads.com/book/show/23692271-sapiens", linkLabel: "GOODREADS" },
