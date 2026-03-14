@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10">
+    <footer className="border-t border-white/10 bg-dark/80 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
         {/* Left — external links */}
         <div className="flex items-center gap-4">
@@ -12,8 +12,8 @@ export default function Footer() {
 
         {/* Right — status + copyright */}
         <div className="flex items-center gap-6">
-          <span className="font-mono text-xs text-white/30 flex items-center gap-2">
-            STATUS: <span className="text-cyan">CONNECTED</span>
+          <span className="font-mono text-xs text-cyan flex items-center gap-2">
+            ONLINE
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan live-blink" />
           </span>
           <span className="font-mono text-xs text-white/20 font-bold">

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Timeline, { TimelineHandle } from "@/components/ui/Timeline";
@@ -221,17 +220,8 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-6">
             {/* Header */}
             <header className="mb-16">
-              <div className="flex items-start justify-between mb-4">
+              <div className="mb-4">
                 <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
-                >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                  </svg>
-                  EXIT()
-                </Link>
               </div>
               <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
                 THE <span className="text-cyan">JOURNEY</span>

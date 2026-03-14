@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { projects, type ProjectStatus } from "@/data/mock/projects";
@@ -23,12 +22,12 @@ export default function ProjectsPage() {
     ? projects.find((p) => p.id === activeProjectId) ?? null
     : null;
 
-  const filterOptions: Array<{ value: FilterOption; label: string }> = [
-    { value: "all", label: "ALL" },
-    { value: "built", label: "DEPLOYED" },
-    { value: "ongoing", label: "IN_DEV" },
-    { value: "idea", label: "CONCEPT" },
-    { value: "deleted", label: "INTERRUPTED" },
+  const filterOptions: Array<{ value: FilterOption; label: string; activeClass: string }> = [
+    { value: "all", label: "ALL", activeClass: "bg-cyan text-dark border-cyan" },
+    { value: "built", label: "DEPLOYED", activeClass: "bg-cyan text-dark border-cyan" },
+    { value: "ongoing", label: "IN_DEV", activeClass: "bg-magenta text-dark border-magenta" },
+    { value: "idea", label: "CONCEPT", activeClass: "bg-yellow text-dark border-yellow" },
+    { value: "deleted", label: "INTERRUPTED", activeClass: "bg-red-500 text-dark border-red-500" },
   ];
 
   return (
@@ -39,17 +38,8 @@ export default function ProjectsPage() {
         <div className="mx-auto max-w-7xl px-6">
           {/* Header */}
           <header className="mb-16">
-            <div className="flex items-start justify-between mb-4">
+            <div className="mb-4">
               <p className="font-mono text-xs text-magenta">[03] // PATHS_MODULE</p>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                </svg>
-                EXIT()
-              </Link>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
               {activeProject ? (
@@ -87,7 +77,7 @@ export default function ProjectsPage() {
                     onClick={() => setFilter(option.value)}
                     className={`font-mono text-xs px-4 py-2 border transition-all duration-300 ${
                       filter === option.value
-                        ? "bg-cyan text-dark border-cyan"
+                        ? option.activeClass
                         : "bg-transparent text-white/50 border-cyan/20 hover:border-cyan/50 hover:text-cyan"
                     }`}
                   >
