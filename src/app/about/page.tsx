@@ -129,6 +129,7 @@ export default function AboutPage() {
       },
       center: [10, 45],
       zoom: 3,
+      interactive: false,
     });
 
     sortedEntries.forEach((entry, index) => {
@@ -206,68 +207,66 @@ export default function AboutPage() {
   }, [showLocationIndicator]);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-dark cyber-grid">
-      <Header />
-
-      {/* Info bar — fixed below header */}
-      <div className="shrink-0 px-6 pt-32 pb-4 border-b border-white/5">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-start justify-between mb-4">
-            <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-              </svg>
-              EXIT()
-            </Link>
-          </div>
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
-            THE <span className="text-cyan">JOURNEY</span>
-          </h1>
-          <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono mb-4">
-            <span className="text-cyan">&gt;</span> From Verona to Frankfurt to London to Berlin — through central banking, startups, and ambulances.
-          </p>
-
-          {/* Legend */}
-          <div className="flex gap-6 font-mono text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
-              <span className="text-white/50">LIVE</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
-              <span className="text-white/50">ARCHIVED</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
-              <span className="text-white/30">QUEUED</span>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-dark flex flex-col">
+      {/* Fixed map background — covers entire viewport */}
+      <div className="fixed inset-0 z-0">
+        <div className="w-full h-full" ref={mapContainer} />
       </div>
 
-      {/* Main content — fills remaining space */}
-      <div className="flex-1 relative min-h-0">
-        {/* Map — constrained to max-w-7xl, behind content */}
-        <div className="absolute inset-0 z-0 flex justify-center">
-          <div className="w-full max-w-7xl px-6">
-            <div className="h-full" ref={mapContainer} />
-          </div>
-        </div>
+      {/* Everything else scrolls on top */}
+      <div className="relative z-10">
+        <Header />
 
-        {/* Timeline panel — scrolls over the map */}
-        <div className="relative z-10 h-full mx-auto max-w-7xl px-6 py-4">
-          <div className="md:w-1/2 lg:w-3/5 h-full overflow-y-auto pr-4 scrollbar-thin">
-            <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
-            <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
+        <main className="flex-1 pt-32 pb-24">
+          <div className="mx-auto max-w-7xl px-6">
+            {/* Header */}
+            <header className="mb-16">
+              <div className="flex items-start justify-between mb-4">
+                <p className="font-mono text-xs text-magenta">[01] // JOURNEY_MODULE</p>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 font-mono text-xs text-cyan/50 hover:text-cyan transition-colors duration-300"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                  </svg>
+                  EXIT()
+                </Link>
+              </div>
+              <h1 className="text-2xl md:text-4xl font-bold text-white mb-3">
+                THE <span className="text-cyan">JOURNEY</span>
+              </h1>
+              <p className="text-lg text-white/50 max-w-2xl leading-relaxed font-mono mb-4">
+                <span className="text-cyan">&gt;</span> From Verona to Frankfurt to London to Berlin — through central banking, startups, and ambulances.
+              </p>
+
+              {/* Legend */}
+              <div className="flex gap-6 font-mono text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
+                  <span className="text-white/50">LIVE</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-magenta rounded-full shadow-[0_0_10px_#ff8800]"></div>
+                  <span className="text-white/50">ARCHIVED</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-white/20 rounded-full border border-white/10"></div>
+                  <span className="text-white/30">QUEUED</span>
+                </div>
+              </div>
+            </header>
+
+            {/* Timeline */}
+            <div className="md:w-2/3 lg:w-1/2">
+              <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
+              <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
+            </div>
           </div>
-        </div>
+        </main>
+
+        <Footer />
       </div>
-
-      <Footer />
     </div>
   );
 }

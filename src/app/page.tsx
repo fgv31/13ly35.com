@@ -10,26 +10,98 @@ const navigationCards = [
     href: "/about",
     description: "From Verona to Berlin — the places and what happened there",
     number: "01",
+    icon: "journey",
   },
   {
     title: "TASTE",
     href: "/taste",
     description: "Curated recommendations across media and objects",
     number: "02",
+    icon: "taste",
   },
   {
     title: "PROJECTS",
     href: "/projects",
     description: "Ideas built, building, and imagined",
     number: "03",
+    icon: "projects",
   },
   {
     title: "NOW",
     href: "/now",
     description: "Current focus and weekly reflections",
     number: "04",
+    icon: "now",
   },
 ];
+
+function CyberIcon({ type }: { type: string }) {
+  switch (type) {
+    case "journey":
+      return (
+        <svg viewBox="0 0 48 48" className="w-8 h-8 sm:w-12 sm:h-12 cyber-icon">
+          {/* Globe with orbit ring */}
+          <circle cx="24" cy="24" r="10" fill="none" stroke="var(--accent-cyan)" strokeWidth="1" opacity="0.6" />
+          <ellipse cx="24" cy="24" rx="16" ry="6" fill="none" stroke="var(--accent-cyan)" strokeWidth="0.8" opacity="0.4" className="orbit-ring" />
+          <circle cx="24" cy="24" r="2" fill="var(--accent-cyan)" opacity="0.8" />
+          {/* Blinking dot on orbit */}
+          <circle cx="8" cy="24" r="1.5" fill="var(--accent-cyan)" className="orbit-dot" />
+          {/* Lat lines */}
+          <line x1="14" y1="24" x2="34" y2="24" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+          <line x1="24" y1="14" x2="24" y2="34" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+        </svg>
+      );
+    case "taste":
+      return (
+        <svg viewBox="0 0 48 48" className="w-8 h-8 sm:w-12 sm:h-12 cyber-icon">
+          {/* Equalizer bars */}
+          <rect x="8" y="28" width="4" height="12" fill="var(--accent-magenta)" opacity="0.7" className="eq-bar-1" />
+          <rect x="15" y="18" width="4" height="22" fill="var(--accent-cyan)" opacity="0.7" className="eq-bar-2" />
+          <rect x="22" y="12" width="4" height="28" fill="var(--accent-magenta)" opacity="0.7" className="eq-bar-3" />
+          <rect x="29" y="22" width="4" height="18" fill="var(--accent-cyan)" opacity="0.7" className="eq-bar-4" />
+          <rect x="36" y="16" width="4" height="24" fill="var(--accent-magenta)" opacity="0.7" className="eq-bar-5" />
+          {/* Scan line */}
+          <line x1="6" y1="8" x2="42" y2="8" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+          <line x1="6" y1="42" x2="42" y2="42" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+        </svg>
+      );
+    case "projects":
+      return (
+        <svg viewBox="0 0 48 48" className="w-8 h-8 sm:w-12 sm:h-12 cyber-icon">
+          {/* Terminal window */}
+          <rect x="8" y="10" width="32" height="28" rx="2" fill="none" stroke="var(--accent-cyan)" strokeWidth="1" opacity="0.5" />
+          <line x1="8" y1="16" x2="40" y2="16" stroke="var(--accent-cyan)" strokeWidth="0.8" opacity="0.3" />
+          {/* Window dots */}
+          <circle cx="12" cy="13" r="1" fill="var(--accent-magenta)" opacity="0.7" />
+          <circle cx="16" cy="13" r="1" fill="var(--accent-yellow)" opacity="0.7" />
+          <circle cx="20" cy="13" r="1" fill="var(--accent-cyan)" opacity="0.7" />
+          {/* Code lines */}
+          <line x1="12" y1="22" x2="24" y2="22" stroke="var(--accent-cyan)" strokeWidth="1.5" opacity="0.6" className="code-line-1" />
+          <line x1="12" y1="27" x2="30" y2="27" stroke="var(--accent-magenta)" strokeWidth="1.5" opacity="0.4" className="code-line-2" />
+          <line x1="12" y1="32" x2="20" y2="32" stroke="var(--accent-cyan)" strokeWidth="1.5" opacity="0.6" className="code-line-3" />
+          {/* Cursor blink */}
+          <rect x="22" y="30" width="2" height="5" fill="var(--accent-cyan)" className="terminal-cursor" />
+        </svg>
+      );
+    case "now":
+      return (
+        <svg viewBox="0 0 48 48" className="w-8 h-8 sm:w-12 sm:h-12 cyber-icon">
+          {/* Signal pulse */}
+          <circle cx="24" cy="24" r="4" fill="var(--accent-cyan)" opacity="0.8" className="pulse-core" />
+          <circle cx="24" cy="24" r="10" fill="none" stroke="var(--accent-cyan)" strokeWidth="0.8" opacity="0.4" className="pulse-ring-1" />
+          <circle cx="24" cy="24" r="16" fill="none" stroke="var(--accent-cyan)" strokeWidth="0.6" opacity="0.2" className="pulse-ring-2" />
+          <circle cx="24" cy="24" r="22" fill="none" stroke="var(--accent-cyan)" strokeWidth="0.4" opacity="0.1" className="pulse-ring-3" />
+          {/* Crosshairs */}
+          <line x1="24" y1="2" x2="24" y2="10" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+          <line x1="24" y1="38" x2="24" y2="46" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+          <line x1="2" y1="24" x2="10" y2="24" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+          <line x1="38" y1="24" x2="46" y2="24" stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.3" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
 
 export default function Home() {
   return (
@@ -79,11 +151,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Navigation Cards Grid */}
+        {/* Navigation Cards Grid — 2 per row */}
         <section className="px-6 py-24 border-t border-white/10">
           <div className="mx-auto max-w-7xl">
             <p className="font-mono text-xs text-magenta mb-8">// NAVIGATION_MODULES</p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               {navigationCards.map((card, index) => (
                 <Link
                   key={card.href}
@@ -94,13 +166,16 @@ export default function Home() {
                     animation: `fadeIn 0.6s ease-out ${index * 0.1}s forwards`,
                   }}
                 >
-                  {/* Number */}
-                  <span className="font-mono text-xs text-cyan/30 group-hover:text-cyan transition-colors duration-300">
-                    [{card.number}]
-                  </span>
+                  {/* Icon + Number row */}
+                  <div className="flex items-start justify-between mb-6">
+                    <CyberIcon type={card.icon} />
+                    <span className="font-mono text-xs text-cyan/30 group-hover:text-cyan transition-colors duration-300">
+                      [{card.number}]
+                    </span>
+                  </div>
 
                   {/* Title */}
-                  <h2 className="mt-6 font-mono text-xl font-bold text-white group-hover:text-cyan transition-colors duration-300">
+                  <h2 className="font-mono text-xl font-bold text-white group-hover:text-cyan transition-colors duration-300">
                     {card.title}
                   </h2>
 
