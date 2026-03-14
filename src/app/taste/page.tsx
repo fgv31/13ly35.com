@@ -16,7 +16,8 @@ export default function TastePage() {
     { value: "movies", label: "MOVIES", activeClass: "bg-magenta text-dark border-magenta" },
     { value: "music", label: "MUSIC", activeClass: "bg-cyan text-dark border-cyan" },
     { value: "objects", label: "OBJECTS", activeClass: "bg-yellow text-dark border-yellow" },
-    { value: "channels", label: "CHANNELS", activeClass: "bg-magenta text-dark border-magenta" },
+    { value: "people", label: "PEOPLE", activeClass: "bg-magenta text-dark border-magenta" },
+    { value: "food", label: "FOOD", activeClass: "bg-yellow text-dark border-yellow" },
   ];
 
   const filteredRecommendations = recommendations.filter((rec) => {

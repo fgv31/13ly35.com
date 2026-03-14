@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -34,6 +35,11 @@ const navigationCards = [
     icon: "now",
   },
 ];
+
+const GLITCH_CHARS = "/<>[]{}|\\#@$%&*^~";
+const NAME_FIRST = "FRANCESCO";
+const NAME_SECOND = "VILLANI";
+const TAGLINE = "> Building stuff, exploring the world, and documenting the journey.";
 
 function CyberIcon({ type }: { type: string }) {
   switch (type) {
@@ -122,38 +128,152 @@ function CyberIcon({ type }: { type: string }) {
   }
 }
 
+function useBootSequence() {
+  const [phase, setPhase] = useState(0);
+  // 0: blank, 1: init blinking, 2: glitch→name, 3: typewriter, 4: cta visible
+  const [nameFirst, setNameFirst] = useState("");
+  const [nameSecond, setNameSecond] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [initBlinks, setInitBlinks] = useState(0);
+  const [initVisible, setInitVisible] = useState(false);
+
+  useEffect(() => {
+    // Phase 0 → 1: show init text after 400ms
+    const t0 = setTimeout(() => setPhase(1), 400);
+    return () => clearTimeout(t0);
+  }, []);
+
+  // Phase 1: blink "INITIALIZING SYSTEM..." once
+  useEffect(() => {
+    if (phase !== 1) return;
+    let blink = 0;
+    setInitVisible(true);
+    const interval = setInterval(() => {
+      blink++;
+      setInitBlinks(blink);
+      if (blink < 2) {
+        setInitVisible(blink % 2 === 0);
+      } else {
+        setInitVisible(true);
+        clearInterval(interval);
+        setPhase(2);
+      }
+    }, 350);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  // Phase 2: glitch characters → resolve into name
+  useEffect(() => {
+    if (phase !== 2) return;
+    const totalLen = Math.max(NAME_FIRST.length, NAME_SECOND.length);
+    let step = 0;
+    const totalSteps = totalLen + 6; // extra steps for glitch lead-in
+
+    const interval = setInterval(() => {
+      step++;
+
+      // Build first name
+      let f = "";
+      for (let i = 0; i < NAME_FIRST.length; i++) {
+        if (step - 3 > i) {
+          f += NAME_FIRST[i];
+        } else if (step > i) {
+          f += GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+        }
+      }
+      setNameFirst(f);
+
+      // Build second name (starts 2 steps later)
+      let s = "";
+      for (let i = 0; i < NAME_SECOND.length; i++) {
+        if (step - 5 > i) {
+          s += NAME_SECOND[i];
+        } else if (step - 2 > i) {
+          s += GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+        }
+      }
+      setNameSecond(s);
+
+      if (step >= totalSteps) {
+        clearInterval(interval);
+        setNameFirst(NAME_FIRST);
+        setNameSecond(NAME_SECOND);
+        setPhase(3);
+      }
+    }, 60);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  // Phase 3: typewriter for tagline
+  useEffect(() => {
+    if (phase !== 3) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTagline(TAGLINE.slice(0, i));
+      if (i >= TAGLINE.length) {
+        clearInterval(interval);
+        setPhase(4);
+      }
+    }, 30);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  return { phase, nameFirst, nameSecond, tagline, initVisible };
+}
+
 export default function Home() {
+  const { phase, nameFirst, nameSecond, tagline, initVisible } = useBootSequence();
+  const navRef = useRef<HTMLDivElement>(null);
+
+  const scrollToNav = () => {
+    navRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-dark cyber-grid scanlines">
       <Header />
 
-      <main className="flex-1 pt-20">
-        {/* Hero Section */}
-        <section className="px-6 py-32 md:py-48">
-          <div className="mx-auto max-w-7xl">
+      <main className="flex-1">
+        {/* Hero Section — always full viewport height */}
+        <section className="px-6 min-h-screen flex items-center">
+          <div className="mx-auto max-w-7xl w-full">
             <div className="max-w-4xl">
               {/* Terminal intro */}
-              <p className="font-mono text-sm text-cyan/60 mb-6">
+              <p
+                className="font-mono text-sm text-cyan/60 mb-6 h-6"
+                style={{ opacity: initVisible && phase >= 1 ? 1 : 0 }}
+              >
                 &gt; INITIALIZING SYSTEM...
               </p>
 
               {/* Main Title */}
-              <h1 className="text-[clamp(3rem,10vw,8rem)] font-bold leading-[0.9] tracking-tight">
-                <span className="text-white">FRANCESCO</span>
-                <br />
-                <span className="gradient-text">VILLANI</span>
+              <h1 className="text-[clamp(3rem,10vw,8rem)] font-bold leading-[0.9] tracking-tight min-h-[1.8em]">
+                {phase >= 2 && (
+                  <>
+                    <span className="text-white glitch-text">{nameFirst}</span>
+                    <br />
+                    <span className="gradient-text glitch-text">{nameSecond}</span>
+                  </>
+                )}
               </h1>
 
               {/* Tagline */}
-              <p className="mt-12 max-w-lg text-lg text-white/50 leading-relaxed font-mono">
-                <span className="text-magenta">&gt;</span> Building stuff, exploring the world, and documenting the journey.
+              <p className="mt-12 max-w-lg text-lg text-white/50 leading-relaxed font-mono min-h-[2em]">
+                {phase >= 3 && (
+                  <>
+                    <span className="text-magenta">{tagline.slice(0, 1)}</span>
+                    <span>{tagline.slice(1)}</span>
+                    {phase === 3 && <span className="inline-block w-2 h-5 bg-cyan/80 ml-0.5 animate-cursor-blink align-middle" />}
+                  </>
+                )}
               </p>
 
               {/* CTA */}
-              <div className="mt-12 flex items-center gap-8">
-                <Link
-                  href="/about"
-                  className="group inline-flex items-center gap-3 font-mono text-sm font-medium text-cyan border border-cyan/50 px-6 py-3 hover:bg-cyan/10 hover:border-cyan transition-all duration-300 box-glow-cyan"
+              <div className="mt-12 flex items-center gap-8" style={{ opacity: phase >= 4 ? 1 : 0, transition: "opacity 0.5s ease-in" }}>
+                <button
+                  onClick={scrollToNav}
+                  className="group inline-flex items-center gap-3 font-mono text-sm font-medium text-cyan border border-cyan/50 px-6 py-3 hover:bg-cyan/10 hover:border-cyan transition-all duration-300 box-glow-cyan animate-cta-blink"
                 >
                   <span>EXPLORE_SYSTEM</span>
                   <svg
@@ -162,16 +282,16 @@ export default function Home() {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
         </section>
 
         {/* Navigation Cards Grid — 2 per row */}
-        <section className="px-6 py-24 border-t border-white/10">
+        <section ref={navRef} className="px-6 py-24 border-t border-white/10">
           <div className="mx-auto max-w-7xl">
             <p className="font-mono text-xs text-magenta mb-8">// NAVIGATION_MODULES</p>
             <div className="grid gap-4 grid-cols-2">
@@ -258,6 +378,23 @@ export default function Home() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        @keyframes cursorBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        @keyframes ctaBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        .animate-cursor-blink {
+          animation: cursorBlink 0.6s step-end infinite;
+        }
+        .animate-cta-blink {
+          animation: ctaBlink 2s ease-in-out infinite;
+        }
+        .glitch-text {
+          display: inline-block;
         }
       `}</style>
     </div>

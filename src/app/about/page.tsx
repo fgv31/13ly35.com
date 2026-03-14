@@ -41,23 +41,52 @@ export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const timelineRef = useRef<TimelineHandle>(null);
+  const reticleAnim = useRef<number | null>(null);
+
+  const startReticleAnimation = useCallback(() => {
+    if (reticleAnim.current) cancelAnimationFrame(reticleAnim.current);
+    const start = performance.now();
+    const animate = (now: number) => {
+      if (!map.current) return;
+      const t = ((now - start) % 2000) / 2000; // 2s cycle
+      const pulse = Math.sin(t * Math.PI * 2) * 0.5 + 0.5; // 0→1→0
+      const outerR = 20 + pulse * 8;
+      const innerR = 12 + pulse * 6;
+      try {
+        map.current.setPaintProperty("reticle-ring", "circle-radius", outerR);
+        map.current.setPaintProperty("reticle-ring", "circle-stroke-opacity", 0.3 + pulse * 0.4);
+        map.current.setPaintProperty("reticle-ring-inner", "circle-radius", innerR);
+        map.current.setPaintProperty("reticle-ring-inner", "circle-stroke-opacity", 0.15 + pulse * 0.25);
+      } catch { /* map may be removed */ }
+      reticleAnim.current = requestAnimationFrame(animate);
+    };
+    reticleAnim.current = requestAnimationFrame(animate);
+  }, []);
 
   const showLocationIndicator = useCallback((entry: typeof sortedEntries[number]) => {
     if (!map.current) return;
-    const src = map.current.getSource("reticle") as mapboxgl.GeoJSONSource | undefined;
-    if (src) {
-      src.setData({
-        type: "FeatureCollection",
-        features: [{
-          type: "Feature",
-          geometry: { type: "Point", coordinates: entry.coordinates },
-          properties: {
-            color: entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555555" : "#ff8800",
-          },
-        }],
-      });
+    const setReticle = () => {
+      const src = map.current?.getSource("reticle") as mapboxgl.GeoJSONSource | undefined;
+      if (src) {
+        src.setData({
+          type: "FeatureCollection",
+          features: [{
+            type: "Feature",
+            geometry: { type: "Point", coordinates: entry.coordinates },
+            properties: {
+              color: entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555555" : "#ff8800",
+            },
+          }],
+        });
+        startReticleAnimation();
+      }
+    };
+    if (map.current.isStyleLoaded()) {
+      setReticle();
+    } else {
+      map.current.once("load", setReticle);
     }
-  }, []);
+  }, [startReticleAnimation]);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -222,6 +251,7 @@ export default function AboutPage() {
     });
 
     return () => {
+      if (reticleAnim.current) cancelAnimationFrame(reticleAnim.current);
       map.current?.remove();
       map.current = null;
     };
@@ -241,7 +271,7 @@ export default function AboutPage() {
         duration: 2000,
       });
       showLocationIndicator(liveEntry);
-    }, 800);
+    }, 1800);
 
     return () => clearTimeout(timer);
   }, [showLocationIndicator]);
@@ -281,7 +311,7 @@ export default function AboutPage() {
               </p>
 
               {/* Legend */}
-              <div className="flex gap-6 font-mono text-xs">
+              <div className="flex gap-6 font-mono text-xs journey-fade" style={{ animationDelay: "0.3s" }}>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-cyan rounded-full shadow-[0_0_10px_#00ff66] live-blink"></div>
                   <span className="text-white/50">LIVE</span>
@@ -298,7 +328,7 @@ export default function AboutPage() {
             </header>
 
             {/* Timeline */}
-            <div className="md:w-2/3 lg:w-1/2">
+            <div className="md:w-2/3 lg:w-1/2 journey-fade" style={{ animationDelay: "0.6s" }}>
               <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
               <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
             </div>
@@ -307,6 +337,23 @@ export default function AboutPage() {
 
         <Footer />
       </div>
+
+      <style jsx>{`
+        @keyframes journeyFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .journey-fade {
+          opacity: 0;
+          animation: journeyFadeIn 0.8s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
