@@ -23,31 +23,40 @@ const sortedEntries = (() => {
   return [...queued, ...rest];
 })();
 
+// Build GeoJSON features from entries
+const markerFeatures: GeoJSON.Feature[] = sortedEntries.map((entry, index) => ({
+  type: "Feature",
+  geometry: { type: "Point", coordinates: entry.coordinates },
+  properties: {
+    index,
+    category: entry.category,
+    color: categoryMarkerColors[entry.category],
+    radius: entry.category === "live" ? 7 : entry.category === "queued" ? 4 : 5,
+    glowRadius: entry.category === "live" ? 16 : entry.category === "queued" ? 8 : 12,
+    strokeColor: entry.category === "queued" ? "#333333" : "#000000",
+  },
+}));
+
 export default function AboutPage() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const timelineRef = useRef<TimelineHandle>(null);
 
-  const activeIndicator = useRef<mapboxgl.Marker | null>(null);
-
   const showLocationIndicator = useCallback((entry: typeof sortedEntries[number]) => {
-    activeIndicator.current?.remove();
     if (!map.current) return;
-
-    const color = entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555" : "#ff8800";
-
-    const el = document.createElement("div");
-    el.className = "cyber-reticle";
-    el.innerHTML = `
-      <div class="reticle-ring" style="border-color:${color}"></div>
-      <div class="reticle-ring reticle-ring-2" style="border-color:${color}"></div>
-      <div class="reticle-crosshair" style="background:${color}"></div>
-      <div class="reticle-crosshair reticle-crosshair-v" style="background:${color}"></div>
-    `;
-
-    activeIndicator.current = new mapboxgl.Marker({ element: el, anchor: "center" })
-      .setLngLat(entry.coordinates)
-      .addTo(map.current);
+    const src = map.current.getSource("reticle") as mapboxgl.GeoJSONSource | undefined;
+    if (src) {
+      src.setData({
+        type: "FeatureCollection",
+        features: [{
+          type: "Feature",
+          geometry: { type: "Point", coordinates: entry.coordinates },
+          properties: {
+            color: entry.category === "live" ? "#00ff66" : entry.category === "queued" ? "#555555" : "#ff8800",
+          },
+        }],
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -64,6 +73,14 @@ export default function AboutPage() {
           "mapbox-streets": {
             type: "vector",
             url: "mapbox://mapbox.mapbox-streets-v8",
+          },
+          markers: {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: markerFeatures },
+          },
+          reticle: {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: [] },
           },
         },
         layers: [
@@ -124,6 +141,56 @@ export default function AboutPage() {
               "line-dasharray": [3, 3],
             },
           },
+          // Marker glow (outer)
+          {
+            id: "markers-glow",
+            type: "circle",
+            source: "markers",
+            paint: {
+              "circle-radius": ["get", "glowRadius"],
+              "circle-color": ["get", "color"],
+              "circle-opacity": 0.15,
+              "circle-blur": 1,
+            },
+          },
+          // Marker dots
+          {
+            id: "markers-dots",
+            type: "circle",
+            source: "markers",
+            paint: {
+              "circle-radius": ["get", "radius"],
+              "circle-color": ["get", "color"],
+              "circle-stroke-width": 2,
+              "circle-stroke-color": ["get", "strokeColor"],
+            },
+          },
+          // Reticle — outer ring
+          {
+            id: "reticle-ring",
+            type: "circle",
+            source: "reticle",
+            paint: {
+              "circle-radius": 24,
+              "circle-color": "transparent",
+              "circle-stroke-width": 1.5,
+              "circle-stroke-color": ["coalesce", ["get", "color"], "#00ff66"],
+              "circle-stroke-opacity": 0.6,
+            },
+          },
+          // Reticle — inner ring
+          {
+            id: "reticle-ring-inner",
+            type: "circle",
+            source: "reticle",
+            paint: {
+              "circle-radius": 16,
+              "circle-color": "transparent",
+              "circle-stroke-width": 1,
+              "circle-stroke-color": ["coalesce", ["get", "color"], "#00ff66"],
+              "circle-stroke-opacity": 0.3,
+            },
+          },
         ],
       },
       center: [10, 45],
@@ -131,51 +198,34 @@ export default function AboutPage() {
       interactive: false,
     });
 
-    sortedEntries.forEach((entry, index) => {
-      const color = categoryMarkerColors[entry.category];
-      const isLive = entry.category === "live";
-      const isQueued = entry.category === "queued";
+    // Click handler for marker dots
+    map.current.on("click", "markers-dots", (e) => {
+      if (!e.features?.[0]) return;
+      const index = e.features[0].properties?.index;
+      if (index == null) return;
+      const entry = sortedEntries[index];
+      timelineRef.current?.scrollToLocation(index);
+      map.current?.flyTo({
+        center: entry.coordinates,
+        zoom: 5,
+        duration: 1200,
+      });
+      showLocationIndicator(entry);
+    });
 
-      const el = document.createElement("div");
-      el.style.cssText = `
-        width: ${isLive ? "14px" : isQueued ? "8px" : "10px"};
-        height: ${isLive ? "14px" : isQueued ? "8px" : "10px"};
-        background: ${color};
-        border: 2px solid ${isQueued ? "#333" : "#000"};
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 ${isQueued ? "4px" : "8px"} ${color};
-        ${isLive ? "animation: livePulse 1.5s ease-in-out infinite;" : ""}
-      `;
-      el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.8)";
-        el.style.boxShadow = `0 0 16px ${color}`;
-      });
-      el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
-        el.style.boxShadow = `0 0 ${isQueued ? "4px" : "8px"} ${color}`;
-      });
-      el.addEventListener("click", () => {
-        timelineRef.current?.scrollToLocation(index);
-        map.current?.flyTo({
-          center: entry.coordinates,
-          zoom: 5,
-          duration: 1200,
-        });
-        showLocationIndicator(entry);
-      });
-
-      new mapboxgl.Marker(el)
-        .setLngLat(entry.coordinates)
-        .addTo(map.current!);
+    // Cursor pointer on hover
+    map.current.on("mouseenter", "markers-dots", () => {
+      if (map.current) map.current.getCanvas().style.cursor = "pointer";
+    });
+    map.current.on("mouseleave", "markers-dots", () => {
+      if (map.current) map.current.getCanvas().style.cursor = "";
     });
 
     return () => {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [showLocationIndicator]);
 
   // Auto-scroll to LIVE location on mount
   useEffect(() => {
@@ -194,7 +244,7 @@ export default function AboutPage() {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [showLocationIndicator]);
 
   const handleLocationClick = useCallback((entry: JourneyEntry) => {
     map.current?.flyTo({
