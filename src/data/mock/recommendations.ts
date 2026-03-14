@@ -1,4 +1,4 @@
-export type Category = "movies" | "music" | "objects" | "people" | "food";
+export type Category = "movies" | "music" | "objects" | "people" | "places" | "books";
 
 export interface Recommendation {
   id: string;
@@ -48,11 +48,19 @@ export const recommendations: Recommendation[] = [
   { id: "p5", title: "Linus Tech Tips", category: "people", rating: 4, description: "Tech entertainment empire", detail: "The biggest tech channel for a reason. From server room builds to GPU reviews, LTT covers everything with production quality that keeps getting better.", link: "https://www.youtube.com/@LinusTechTips", linkLabel: "YOUTUBE" },
   { id: "p6", title: "3Blue1Brown", category: "people", rating: 5, description: "Math, visualized beautifully", detail: "Grant Sanderson makes calculus, linear algebra, and neural networks click through stunning animations. The kind of channel that makes you wish school was like this.", link: "https://www.youtube.com/@3blue1brown", linkLabel: "YOUTUBE" },
 
-  // ── FOOD ──────────────────────────────────────────
-  { id: "f1", title: "Neapolitan Pizza", category: "food", rating: 5, description: "The original and the best", detail: "San Marzano tomatoes, fior di latte, fresh basil, 90 seconds in a 450°C wood-fired oven. Nothing else comes close. The Margherita is perfection in simplicity." },
-  { id: "f2", title: "Ramen", category: "food", rating: 5, description: "Soul in a bowl", detail: "Tonkotsu broth simmered for 18 hours, chashu pork, ajitama egg, spring onions. The depth of flavor is unmatched. Every bowl tells a story." },
-  { id: "f3", title: "Tiramisu", category: "food", rating: 5, description: "Italian comfort perfected", detail: "Mascarpone, espresso-soaked savoiardi, cocoa. The simplest ingredients combined with technique and time. No baking required, just patience." },
-  { id: "f4", title: "Tacos al Pastor", category: "food", rating: 5, description: "Mexico City street magic", detail: "Marinated pork carved from a trompo, pineapple, cilantro, onion, a squeeze of lime on a corn tortilla. The perfect street food doesn't exi—" },
-  { id: "f5", title: "Sushi Omakase", category: "food", rating: 5, description: "Trust the chef", detail: "The art of surrender. Each piece placed deliberately, eaten immediately. Decades of mastery in every cut. The rice matters more than the fish." },
-  { id: "f6", title: "Carbonara", category: "food", rating: 5, description: "Four ingredients, infinite debate", detail: "Guanciale, pecorino, egg yolks, black pepper. No cream. Ever. The emulsion is the magic — silky, rich, and gone in minutes." },
+  // ── PLACES ─────────────────────────────────────────
+  { id: "pl1", title: "Neapolitan Pizza", category: "places", rating: 5, description: "The original and the best", detail: "San Marzano tomatoes, fior di latte, fresh basil, 90 seconds in a 450°C wood-fired oven. Nothing else comes close. The Margherita is perfection in simplicity." },
+  { id: "pl2", title: "Ramen", category: "places", rating: 5, description: "Soul in a bowl", detail: "Tonkotsu broth simmered for 18 hours, chashu pork, ajitama egg, spring onions. The depth of flavor is unmatched. Every bowl tells a story." },
+  { id: "pl3", title: "Tiramisu", category: "places", rating: 5, description: "Italian comfort perfected", detail: "Mascarpone, espresso-soaked savoiardi, cocoa. The simplest ingredients combined with technique and time. No baking required, just patience." },
+  { id: "pl4", title: "Tacos al Pastor", category: "places", rating: 5, description: "Mexico City street magic", detail: "Marinated pork carved from a trompo, pineapple, cilantro, onion, a squeeze of lime on a corn tortilla. The perfect street food doesn't exi—" },
+  { id: "pl5", title: "Sushi Omakase", category: "places", rating: 5, description: "Trust the chef", detail: "The art of surrender. Each piece placed deliberately, eaten immediately. Decades of mastery in every cut. The rice matters more than the fish." },
+  { id: "pl6", title: "Carbonara", category: "places", rating: 5, description: "Four ingredients, infinite debate", detail: "Guanciale, pecorino, egg yolks, black pepper. No cream. Ever. The emulsion is the magic — silky, rich, and gone in minutes." },
+
+  // ── BOOKS ─────────────────────────────────────────
+  { id: "b1", title: "Sapiens", category: "books", rating: 5, description: "History of everything", detail: "Yuval Noah Harari traces the entire arc of humanity — from cognitive revolution to silicon. Changes how you see civilizations, money, and religion. A book that rewires your worldview.", link: "https://www.goodreads.com/book/show/23692271-sapiens", linkLabel: "GOODREADS" },
+  { id: "b2", title: "Dune", category: "books", rating: 5, description: "Sci-fi's magnum opus", detail: "Frank Herbert built an entire universe of politics, ecology, and religion. The spice must flow. Reading it after the movies hits different — so much deeper.", link: "https://www.goodreads.com/book/show/44767458-dune", linkLabel: "GOODREADS" },
+  { id: "b3", title: "The Pragmatic Programmer", category: "books", rating: 5, description: "Software craftsmanship bible", detail: "Hunt and Thomas wrote the handbook every developer should read early. DRY, tracer bullets, broken windows — concepts that stick with you for your entire career.", link: "https://www.goodreads.com/book/show/4099.The_Pragmatic_Programmer", linkLabel: "GOODREADS" },
+  { id: "b4", title: "Atomic Habits", category: "books", rating: 4, description: "Systems over goals", detail: "James Clear distills behavior change into practical, actionable steps. The 1% better every day compound effect is real. Changed how I think about routines.", link: "https://www.goodreads.com/book/show/40121378-atomic-habits", linkLabel: "GOODREADS" },
+  { id: "b5", title: "1984", category: "books", rating: 5, description: "The dystopia we keep quoting", detail: "Orwell's warning gets more relevant every year. Big Brother, doublethink, thoughtcrime — written in 1949 but reads like tomorrow's news.", link: "https://www.goodreads.com/book/show/61439040-1984", linkLabel: "GOODREADS" },
+  { id: "b6", title: "Zero to One", category: "books", rating: 4, description: "Contrarian startup thinking", detail: "Peter Thiel's thesis: don't compete, create monopolies. Provocative, opinionated, and full of ideas that challenge conventional business wisdom.", link: "https://www.goodreads.com/book/show/18050143-zero-to-one", linkLabel: "GOODREADS" },
 ];

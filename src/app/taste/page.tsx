@@ -13,11 +13,12 @@ export default function TastePage() {
 
   const categories: Array<{ value: Category | "all"; label: string; activeClass: string }> = [
     { value: "all", label: "ALL", activeClass: "bg-cyan text-dark border-cyan" },
-    { value: "movies", label: "MOVIES", activeClass: "bg-magenta text-dark border-magenta" },
-    { value: "music", label: "MUSIC", activeClass: "bg-cyan text-dark border-cyan" },
+    { value: "movies", label: "MOVIES", activeClass: "bg-yellow text-dark border-yellow" },
+    { value: "music", label: "MUSIC", activeClass: "bg-yellow text-dark border-yellow" },
     { value: "objects", label: "OBJECTS", activeClass: "bg-yellow text-dark border-yellow" },
-    { value: "people", label: "PEOPLE", activeClass: "bg-magenta text-dark border-magenta" },
-    { value: "food", label: "FOOD", activeClass: "bg-yellow text-dark border-yellow" },
+    { value: "people", label: "PEOPLE", activeClass: "bg-yellow text-dark border-yellow" },
+    { value: "places", label: "PLACES", activeClass: "bg-yellow text-dark border-yellow" },
+    { value: "books", label: "BOOKS", activeClass: "bg-yellow text-dark border-yellow" },
   ];
 
   const filteredRecommendations = recommendations.filter((rec) => {
