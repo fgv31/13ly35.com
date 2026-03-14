@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 
 interface CyberLoaderProps {
   label?: string;
+  onInterrupted?: () => void;
 }
 
 const PERCENT_STEPS = [0, 12, 27, 38, 49, 62, 64];
 
-export default function CyberLoader({ label = "MODULE_LOADING" }: CyberLoaderProps) {
+export default function CyberLoader({ label = "MODULE_LOADING", onInterrupted }: CyberLoaderProps) {
   const [step, setStep] = useState(0);
   const [interrupted, setInterrupted] = useState(false);
 
@@ -24,7 +25,10 @@ export default function CyberLoader({ label = "MODULE_LOADING" }: CyberLoaderPro
         }, delays[i]);
       } else {
         // After last step, show interrupted
-        timeout = setTimeout(() => setInterrupted(true), 400);
+        timeout = setTimeout(() => {
+          setInterrupted(true);
+          onInterrupted?.();
+        }, 400);
       }
     };
 

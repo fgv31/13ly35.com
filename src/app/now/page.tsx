@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CyberLoader from "@/components/ui/CyberLoader";
 
 export default function NowPage() {
+  const [showTerminal, setShowTerminal] = useState(false);
+
   return (
     <div className="min-h-screen bg-dark cyber-grid flex flex-col">
       <Header />
@@ -26,12 +29,15 @@ export default function NowPage() {
 
           {/* Loader + terminal */}
           <div className="max-w-xl">
-            <CyberLoader label="NOW_MODULE_SYNC" />
+            <CyberLoader label="FEED_MODULE_SYNC" onInterrupted={() => setShowTerminal(true)} />
 
-            <div className="border border-cyan/20 bg-dark/80 p-6 font-mono text-sm mt-8">
-              <p className="text-cyan/60">$ now --sync --source obsidian</p>
+            <div
+              className="border border-cyan/20 bg-dark/80 p-6 font-mono text-sm mt-8 transition-opacity duration-500"
+              style={{ opacity: showTerminal ? 1 : 0 }}
+            >
+              <p className="text-cyan/60">$ feed --sync --source obsidian</p>
               <p className="text-white/40 mt-2">Establishing secure connection...</p>
-              <p className="text-magenta mt-1">× Pipeline interrupted — module under development</p>
+              <p className="text-magenta mt-1">&times; Pipeline interrupted — module under development</p>
               <p className="text-white/20 mt-2 cursor-blink">Retry scheduled</p>
             </div>
           </div>
