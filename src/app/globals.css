@@ -306,6 +306,46 @@ body {
   filter: drop-shadow(0 0 8px var(--accent-cyan));
 }
 
+/* Cyberpunk image loader animations */
+@keyframes cyberSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes cyberPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(0.7); opacity: 1; }
+}
+
+@keyframes cyberBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes cyberScanY {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(calc(100vh)); }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .scanlines::after {
+    display: none;
+  }
+
+  .cyber-grid {
+    background-image: none;
+  }
+}
+
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));

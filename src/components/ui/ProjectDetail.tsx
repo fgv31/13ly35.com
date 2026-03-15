@@ -10,6 +10,83 @@ const statusStyles: Record<ProjectStatus, { color: string; label: string; bg: st
   deleted: { color: "text-red-500", label: "INTERRUPTED", bg: "bg-red-500/10 border-red-500/30" },
 };
 
+function CyberImageLoader() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-dark/80">
+      <div className="relative w-12 h-12">
+        {/* Outer spinning ring */}
+        <div className="absolute inset-0 border border-cyan/60 animate-[cyberSpin_2s_linear_infinite]" />
+        {/* Inner pulsing square */}
+        <div className="absolute inset-2 border border-magenta/50 animate-[cyberPulse_1s_ease-in-out_infinite]" />
+        {/* Center dot */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-1.5 h-1.5 bg-cyan animate-[cyberBlink_0.6s_step-end_infinite]" />
+        </div>
+        {/* Corner brackets */}
+        <div className="absolute -top-1 -left-1 w-2 h-2 border-t border-l border-cyan/40" />
+        <div className="absolute -top-1 -right-1 w-2 h-2 border-t border-r border-cyan/40" />
+        <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b border-l border-cyan/40" />
+        <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b border-r border-cyan/40" />
+      </div>
+      {/* Scan line sweeping across */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent animate-[cyberScanY_2s_linear_infinite]" />
+      </div>
+    </div>
+  );
+}
+
+function CyberImage({
+  src,
+  alt,
+  onClick,
+  index,
+}: {
+  src: string;
+  alt: string;
+  onClick: () => void;
+  index: number;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <button
+      onClick={onClick}
+      className="aspect-video border border-cyan/10 hover:border-cyan/40 bg-dark/50 overflow-hidden transition-all duration-300 cursor-pointer group relative"
+    >
+      {!loaded && <CyberImageLoader />}
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+        onLoad={() => setLoaded(true)}
+      />
+      {loaded && (
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+          <svg
+            className="w-6 h-6 text-white/0 group-hover:text-white/60 transition-colors duration-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+            />
+          </svg>
+        </div>
+      )}
+      <span className="absolute bottom-1 right-2 font-mono text-[9px] text-white/30">
+        {index + 1}
+      </span>
+    </button>
+  );
+}
+
 interface ProjectDetailProps {
   project: Project;
   onClose: () => void;
@@ -116,7 +193,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
       )}
 
       {/* Detail container */}
-      <div className="border border-cyan/20 bg-muted/50 relative mx-4 md:mx-8">
+      <div className="border border-cyan/20 bg-muted/50 relative">
         {/* Content */}
         <div className="p-8 md:p-12">
           {/* Status bar */}
@@ -140,6 +217,13 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </button>
           </div>
 
+          {/* Title */}
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-6">
+            <span className="text-cyan">PATH</span>
+            <span className="text-white/30">://</span>{" "}
+            <span className="text-magenta">{project.title.toUpperCase()}</span>
+          </h2>
+
           {/* Description */}
           <div>
             <p className="font-mono text-xs text-cyan/50 mb-3">// DESCRIPTION</p>
@@ -148,8 +232,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </p>
           </div>
 
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <div className="h-8" />
 
           {/* Info grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -186,8 +269,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </div>
           </div>
 
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <div className="h-8" />
 
           {/* Screenshots */}
           {project.images && project.images.length > 0 ? (
@@ -195,35 +277,13 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
               <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS — CLICK TO EXPAND</p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {project.images.map((img, i) => (
-                  <button
+                  <CyberImage
                     key={i}
+                    src={img}
+                    alt={`${project.title} slide ${i + 1}`}
                     onClick={() => setFullscreenImg(img)}
-                    className="aspect-video border border-cyan/10 hover:border-cyan/40 bg-dark/50 overflow-hidden transition-all duration-300 cursor-pointer group relative"
-                  >
-                    <img
-                      src={img}
-                      alt={`${project.title} slide ${i + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-white/0 group-hover:text-white/60 transition-colors duration-300"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
-                        />
-                      </svg>
-                    </div>
-                    <span className="absolute bottom-1 right-2 font-mono text-[9px] text-white/30">
-                      {i + 1}
-                    </span>
-                  </button>
+                    index={i}
+                  />
                 ))}
               </div>
             </div>
@@ -236,8 +296,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </div>
           )}
 
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
-          <p className="font-mono text-xs text-white/0 my-4">&nbsp;</p>
+          <div className="h-8" />
 
           {/* Links */}
           {(project.github || project.liveUrl) && (
@@ -269,17 +328,6 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           )}
         </div>
       </div>
-
-      {/* Back hint */}
-      <button
-        onClick={onClose}
-        className="mt-6 font-mono text-xs text-white/20 hover:text-cyan transition-colors duration-300 flex items-center gap-2 cursor-pointer"
-      >
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-        </svg>
-        BACK_TO_LIST
-      </button>
     </div>
   );
 }

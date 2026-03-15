@@ -6,7 +6,7 @@ export default function Footer() {
         <div className="flex items-center gap-4">
           <span className="font-mono text-xs text-magenta">[EXTERNAL]</span>
           <a href="https://github.com/fgv31" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-white/30 hover:text-cyan transition-colors duration-300">GITHUB</a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-white/30 hover:text-cyan transition-colors duration-300">LINKEDIN</a>
+          <a href="https://www.linkedin.com/in/francesco-villani/" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-white/30 hover:text-cyan transition-colors duration-300">LINKEDIN</a>
           <a href="mailto:hello@13ly35.com" className="font-mono text-xs text-white/30 hover:text-cyan transition-colors duration-300">EMAIL</a>
         </div>
 

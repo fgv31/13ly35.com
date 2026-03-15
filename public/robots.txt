@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://13ly35.com/sitemap.xml
