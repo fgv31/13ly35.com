@@ -27,7 +27,7 @@ export default function RecommendationCard({ recommendation, isExpanded, onClick
 
       <div className="flex items-start justify-between gap-4 mb-4">
         <span className="font-mono text-xs text-magenta">
-          // {recommendation.category.toUpperCase()}
+          {'// '}{recommendation.category.toUpperCase()}
         </span>
         <StarRating rating={recommendation.rating} />
       </div>
@@ -66,7 +66,7 @@ export default function RecommendationCard({ recommendation, isExpanded, onClick
             </a>
           )}
 
-          <p className="mt-4 font-mono text-[10px] text-white/20">// CLICK TO COLLAPSE</p>
+          <p className="mt-4 font-mono text-[10px] text-white/20">{'// CLICK TO COLLAPSE'}</p>
         </div>
       )}
     </button>

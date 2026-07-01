@@ -8,28 +8,28 @@ import Footer from "@/components/layout/Footer";
 const navigationCards = [
   {
     title: "JOURNEY",
-    href: "/about",
+    href: "/journey",
     description: "From Verona to Berlin — the places and what happened there",
     number: "01",
     icon: "journey",
   },
   {
     title: "PICKS",
-    href: "/taste",
+    href: "/picks",
     description: "Curated recommendations across media and objects",
     number: "02",
     icon: "taste",
   },
   {
     title: "PATHS",
-    href: "/projects",
+    href: "/paths",
     description: "Ideas built, building, and imagined",
     number: "03",
     icon: "projects",
   },
   {
     title: "FEED",
-    href: "/now",
+    href: "/feed",
     description: "Current focus and weekly reflections",
     number: "04",
     icon: "now",
@@ -295,7 +295,7 @@ export default function HomeClient() {
         {/* Navigation Cards Grid — 2 per row */}
         <section ref={navRef} className="px-6 py-24 border-t border-white/10">
           <div className="mx-auto max-w-7xl">
-            <p className="font-mono text-xs text-magenta mb-8">// NAVIGATION_MODULES</p>
+            <p className="font-mono text-xs text-magenta mb-8">{'// NAVIGATION_MODULES'}</p>
             <div className="grid gap-4 grid-cols-2">
               {navigationCards.map((card, index) => (
                 <Link
@@ -346,7 +346,7 @@ export default function HomeClient() {
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 p-12 border border-magenta/20 bg-muted/30">
               <div>
-                <p className="font-mono text-xs text-magenta mb-4">// ESTABLISH_CONNECTION</p>
+                <p className="font-mono text-xs text-magenta mb-4">{'// ESTABLISH_CONNECTION'}</p>
                 <h2 className="text-4xl md:text-5xl font-bold text-white">
                   LET&apos;S <span className="text-magenta">CONNECT</span>
                 </h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
+import Link from "next/link";
 import { JourneyEntry } from "@/data/mock/cv";
 
 interface TimelineProps {
@@ -145,6 +146,18 @@ const Timeline = forwardRef<TimelineHandle, TimelineProps>(
                         </p>
                       </div>
                     ))}
+                    {entry.link && (
+                      <div className="relative pt-2">
+                        <div className="absolute left-[-29px] top-[18px] w-[6px] h-[6px] rounded-full bg-cyan/40" />
+                        <Link
+                          href={entry.link.href}
+                          className="inline-flex items-center gap-2 font-mono text-[10px] tracking-wider text-cyan border border-cyan/20 hover:border-cyan hover:bg-cyan/5 px-4 py-2 transition-all duration-300"
+                        >
+                          {entry.link.label}
+                          <span className="text-white/30">→</span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

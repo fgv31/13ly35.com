@@ -5,11 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navLinks = [
-  { href: "/about", label: "JOURNEY" },
-  { href: "/taste", label: "PICKS" },
-  { href: "/projects", label: "PATHS" },
-  { href: "/now", label: "FEED" },
+  { href: "/journey", label: "JOURNEY", matchPrefixes: ["/journey"] },
+  { href: "/picks", label: "PICKS" },
+  { href: "/paths", label: "PATHS" },
+  { href: "/feed", label: "FEED" },
 ];
+
+function isActive(pathname: string, link: typeof navLinks[number]) {
+  if (pathname === link.href) return true;
+  if (link.matchPrefixes) return link.matchPrefixes.some((p) => pathname.startsWith(p));
+  return false;
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -35,7 +41,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 className={`relative font-mono text-xs tracking-wider transition-all duration-300 ${
-                  pathname === link.href
+                  isActive(pathname, link)
                     ? "text-cyan glow-cyan"
                     : "text-white/60 hover:text-cyan neon-underline"
                 }`}
@@ -76,7 +82,7 @@ export default function Header() {
               href={link.href}
               onClick={() => setMenuOpen(false)}
               className={`px-6 py-4 font-mono text-xs tracking-wider border-b border-white/5 transition-all duration-300 ${
-                pathname === link.href
+                isActive(pathname, link)
                   ? "text-cyan glow-cyan bg-cyan/5"
                   : "text-white/60 hover:text-cyan hover:bg-white/5"
               }`}

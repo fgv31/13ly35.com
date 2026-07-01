@@ -226,7 +226,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
 
           {/* Description */}
           <div>
-            <p className="font-mono text-xs text-cyan/50 mb-3">// DESCRIPTION</p>
+            <p className="font-mono text-xs text-cyan/50 mb-3">{'// DESCRIPTION'}</p>
             <p className="text-white/70 leading-relaxed max-w-3xl">
               {project.detail || project.description}
             </p>
@@ -239,7 +239,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             {/* Tech stack */}
             {project.tech && project.tech.length > 0 && (
               <div>
-                <p className="font-mono text-xs text-cyan/50 mb-3">// TECH_STACK</p>
+                <p className="font-mono text-xs text-cyan/50 mb-3">{'// TECH_STACK'}</p>
                 <div className="flex flex-wrap gap-2">
                   {project.tech.map((t) => (
                     <span
@@ -255,7 +255,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
 
             {/* Tags */}
             <div>
-              <p className="font-mono text-xs text-cyan/50 mb-3">// TAGS</p>
+              <p className="font-mono text-xs text-cyan/50 mb-3">{'// TAGS'}</p>
               <div className="flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
                   <span
@@ -274,7 +274,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           {/* Screenshots */}
           {project.images && project.images.length > 0 ? (
             <div>
-              <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS — CLICK TO EXPAND</p>
+              <p className="font-mono text-xs text-cyan/50 mb-3">{'// SCREENSHOTS — CLICK TO EXPAND'}</p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {project.images.map((img, i) => (
                   <CyberImage
@@ -289,7 +289,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
             </div>
           ) : (
             <div>
-              <p className="font-mono text-xs text-cyan/50 mb-3">// SCREENSHOTS</p>
+              <p className="font-mono text-xs text-cyan/50 mb-3">{'// SCREENSHOTS'}</p>
               <div className="border border-dashed border-white/10 py-12 flex items-center justify-center">
                 <p className="font-mono text-xs text-white/20">NO_VISUAL_DATA_AVAILABLE</p>
               </div>
@@ -301,7 +301,7 @@ export default function ProjectDetail({ project, onClose }: ProjectDetailProps) 
           {/* Links */}
           {(project.github || project.liveUrl) && (
             <div>
-              <p className="font-mono text-xs text-cyan/50 mb-3">// LINKS</p>
+              <p className="font-mono text-xs text-cyan/50 mb-3">{'// LINKS'}</p>
               <div className="flex gap-4">
                 {project.github && (
                   <a

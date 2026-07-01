@@ -94,7 +94,7 @@ export const projects: Project[] = [
     status: "idea",
     tags: ["ai", "sports", "platform"],
     tech: ["AI/ML", "Computer Vision", "React", "Cloud"],
-    liveUrl: "https://preempic.com",
+    liveUrl: "https://preempic.13ly35.com",
     images: ["/projects/preempic/page-01.png"],
     year: "2025",
   },

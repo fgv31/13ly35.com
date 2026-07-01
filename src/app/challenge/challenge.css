@@ -1,0 +1,87 @@
+html {
+  scroll-behavior: smooth;
+}
+
+/* The challenge-scope is its own scroll container so we can snap-scroll
+   without affecting the rest of the site. Body should not also scroll. */
+html:has(.challenge-scope),
+body:has(.challenge-scope) {
+  overflow: hidden;
+  height: 100%;
+}
+
+.challenge-scope {
+  scroll-behavior: smooth;
+  --upvest-bg: #f3f5fb;
+  --upvest-surface: #ffffff;
+  --upvest-ink: #0e1238;
+  --upvest-accent: #4f5bff;       /* indigo from upvest.co */
+  --upvest-accent-soft: #e7eaff;
+  --upvest-muted: #5b6079;
+  background: var(--upvest-bg);
+  color: var(--upvest-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y proximity;
+  scrollbar-width: thin;
+}
+.challenge-scope h1, .challenge-scope h2 { letter-spacing: -0.02em; }
+
+/* ─── Slide-snap: each section is a stop at viewport height minimum ───────── */
+.challenge-scope section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
+}
+
+/* ─── Vertical rhythm ─────────────────────────────────────────────────────── */
+/* SectionWrapper already applies py-24 md:py-32 — no override needed.        */
+
+/* ─── Accent divider between sections ────────────────────────────────────── */
+.challenge-scope section + section {
+  position: relative;
+}
+.challenge-scope section + section::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 1px;
+  background-color: rgba(79, 91, 255, 0.1);
+  pointer-events: none;
+}
+
+/* ─── Image overflow protection (mobile) ─────────────────────────────────── */
+.challenge-scope img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── EWI funnel: prevent narrow trapezoid rows from becoming unreadable ──── */
+/* No data-ewi-funnel or ewi-row marker in JSX — use structural selector.     */
+@media (max-width: 640px) {
+  .challenge-scope main .ewi-funnel > * {
+    width: 100% !important;
+    max-width: 100%;
+  }
+  /* Target the funnel rows rendered by ewiLayers map (flex children of the
+     items-center flex-col container inside the q2 section).                  */
+  .challenge-scope section#q2 .flex.flex-col.gap-2.items-center > * {
+    width: 100% !important;
+    max-width: 100%;
+  }
+}
+
+/* ─── Sticky-nav clearance: prevent right-side nav from overlapping content ─ */
+/* StickyNav is hidden on mobile, so only md+ matters.                         */
+.challenge-scope section {
+  padding-right: 1.5rem;
+}
+@media (min-width: 768px) {
+  .challenge-scope section {
+    padding-right: 4rem;
+  }
+}

@@ -329,7 +329,7 @@ export default function AboutClient() {
 
             {/* Timeline */}
             <div className="md:w-2/3 lg:w-1/2 journey-fade" style={{ animationDelay: "0.6s" }}>
-              <p className="font-mono text-xs text-magenta mb-6">// CLICK A LOCATION TO EXPLORE</p>
+              <p className="font-mono text-xs text-magenta mb-6">{'// CLICK A LOCATION TO EXPLORE'}</p>
               <Timeline ref={timelineRef} entries={sortedEntries} onLocationClick={handleLocationClick} />
             </div>
           </div>

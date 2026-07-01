@@ -4,6 +4,7 @@ export interface JourneyEntry {
   country: string;
   coordinates: [number, number]; // [lng, lat]
   category: "live" | "archived" | "queued";
+  link?: { href: string; label: string };
   entries: {
     title: string;
     type: "work" | "education" | "personal" | "volunteer";
@@ -269,6 +270,7 @@ export const journeyData: JourneyEntry[] = [
     country: "Argentina",
     coordinates: [-68.9, -46.0],
     category: "queued",
+    link: { href: "/journey/patagonia26", label: "VIEW ITINERARY" },
     entries: [
       {
         title: "Edge of the World",

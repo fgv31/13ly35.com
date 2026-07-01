@@ -1,0 +1,58 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   ai-challenge.css — Brand tokens & slide variant surfaces
+   All selectors scoped under .av2-scope (no :root / global leakage).
+   @font-face block is exempt from scoping but is not used here — see comment.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* Inter fallback — Upvest brand font not self-hosted (licensing);
+   pre-approved per master §7 */
+
+.av2-scope {
+  /* ── Upvest design tokens ──────────────────────────────────────────────── */
+  --upvest-accent: #4f5bff;
+  --upvest-bg: #f3f5fb;
+  --upvest-ink: #0e1238;
+  --upvest-surface: #fff;
+  --upvest-accent-soft: #e7eaff;
+  --upvest-muted: #5b6079;
+
+  /* ── Typography ────────────────────────────────────────────────────────── */
+  /* Inter fallback — Upvest brand font not self-hosted (licensing);
+     pre-approved per master §7 */
+  --font-upvest: var(--font-inter, Inter), Inter, system-ui, sans-serif;
+
+  /* ── Base defaults ─────────────────────────────────────────────────────── */
+  background: var(--upvest-bg);
+  color: var(--upvest-ink);
+  font-family: var(--font-upvest);
+}
+
+/* ── Slide variant surfaces ────────────────────────────────────────────────── */
+
+/* light: white surface, primary ink text — default readable content slides */
+.av2-scope .av2-slide--light {
+  background: var(--upvest-surface);
+  color: var(--upvest-ink);
+}
+
+/* tint: soft accent wash — callouts, highlight, mid-weight emphasis */
+.av2-scope .av2-slide--tint {
+  background: var(--upvest-accent-soft);
+  color: var(--upvest-ink);
+}
+
+/* dark: deep ink bg, light text — hero, closing, high-contrast moments */
+.av2-scope .av2-slide--dark {
+  background: var(--upvest-ink);
+  color: var(--upvest-surface);
+}
+
+/* ── Optional: respect reduced-motion preference (engine logic in phase 02) ── */
+@media (prefers-reduced-motion: reduce) {
+  .av2-scope * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

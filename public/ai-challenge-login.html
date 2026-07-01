@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Challenge</title>
+    <style>
+      :root {
+        --bg: #f3f5fb;
+        --ink: #0e1238;
+        --accent: #4f5bff;
+        --accent-soft: #e7eaff;
+        --muted: #5b6079;
+        --error: #c0392b;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
+          system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      main {
+        width: 100%;
+        max-width: 340px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      input[type="password"] {
+        width: 100%;
+        padding: 14px 16px;
+        font-size: 16px;
+        font-family: inherit;
+        color: var(--ink);
+        background: #fff;
+        border: 1px solid #cfd3df;
+        border-radius: 10px;
+        outline: none;
+        text-align: center;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input[type="password"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+      .err {
+        margin: 0;
+        font-size: 12px;
+        color: var(--error);
+        min-height: 16px;
+      }
+      .err[hidden] { visibility: hidden; display: block; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Challenge</h1>
+      <form id="f" autocomplete="off">
+        <input
+          type="password"
+          id="p"
+          autofocus
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Access code"
+        />
+        <p class="err" id="err" hidden>Wrong code.</p>
+      </form>
+    </main>
+    <script>
+      (function () {
+        var f = document.getElementById("f");
+        var p = document.getElementById("p");
+        var err = document.getElementById("err");
+        f.addEventListener("submit", function (e) {
+          e.preventDefault();
+          err.hidden = true;
+          var creds = "Basic " + btoa("upvest:" + p.value);
+          fetch("/ai-challenge/", {
+            method: "GET",
+            credentials: "include",
+            headers: { Authorization: creds },
+            cache: "no-store",
+          })
+            .then(function (r) {
+              if (r.ok) {
+                window.location.replace("/ai-challenge/");
+              } else {
+                err.hidden = false;
+                p.value = "";
+                p.focus();
+              }
+            })
+            .catch(function () {
+              err.hidden = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>
