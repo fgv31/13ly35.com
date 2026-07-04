@@ -1,11 +1,22 @@
-import type { Metadata } from "next";
-import ProjectsClient from "./ProjectsClient";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Projects — Francesco Villani",
-  description: "Ideas built, in development, and imagined.",
-};
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function ProjectsPage() {
-  return <ProjectsClient />;
+	const router = useRouter();
+
+	useEffect(() => {
+		router.replace("/paths");
+	}, [router]);
+
+	return (
+		<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+			<p style={{ fontFamily: "monospace", textTransform: "uppercase" }}>
+				REDIRECTING → /paths
+			</p>
+			<Link href="/paths">Click here if not redirected</Link>
+		</div>
+	);
 }

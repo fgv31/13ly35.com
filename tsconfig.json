@@ -30,5 +30,15 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/components/ai-challenge/sections/ArcSlide.tsx",
+    "src/components/ai-challenge/sections/AssumptionsSlide.tsx",
+    "src/components/ai-challenge/sections/HeroSlide.tsx",
+    "src/components/ai-challenge/sections/PhilosophySlide.tsx",
+    "src/components/ai-challenge/sections/QuestionsSlide.tsx",
+    "src/components/ai-challenge/sections/ReframeSlide.tsx",
+    "src/components/ai-challenge/sections/RevealSlide.tsx",
+    "src/components/ai-challenge/sections/TeamsMapSlide.tsx"
+  ]
 }

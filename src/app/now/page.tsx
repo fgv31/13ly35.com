@@ -1,11 +1,22 @@
-import type { Metadata } from "next";
-import NowClient from "./NowClient";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Now — Francesco Villani",
-  description: "What I'm currently focused on.",
-};
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function NowPage() {
-  return <NowClient />;
+	const router = useRouter();
+
+	useEffect(() => {
+		router.replace("/feed");
+	}, [router]);
+
+	return (
+		<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+			<p style={{ fontFamily: "monospace", textTransform: "uppercase" }}>
+				REDIRECTING → /feed
+			</p>
+			<Link href="/feed">Click here if not redirected</Link>
+		</div>
+	);
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
+import { PointerProvider } from "@/lib/usePointer";
+import { GsapProvider } from "@/lib/motion";
 import "./globals.css";
 
 const inter = Inter({
@@ -77,7 +79,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${pressStart.variable} antialiased bg-beige text-black`}
       >
-        {children}
+        <PointerProvider>
+          <GsapProvider>{children}</GsapProvider>
+        </PointerProvider>
       </body>
     </html>
   );

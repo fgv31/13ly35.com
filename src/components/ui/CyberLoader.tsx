@@ -45,7 +45,7 @@ export default function CyberLoader({ label = "MODULE_LOADING", onInterrupted }:
       <div className="flex items-center justify-between mb-3">
         <span className="font-mono text-xs text-white/30">{label}</span>
         <span
-          className={`font-mono text-xs text-magenta transition-opacity duration-300 ${
+          className={`font-mono text-xs text-violet transition-opacity duration-300 ${
             interrupted ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -60,8 +60,8 @@ export default function CyberLoader({ label = "MODULE_LOADING", onInterrupted }:
           style={{
             width: `${barWidth}%`,
             opacity: interrupted ? 0.15 : 1,
-            background: "linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta))",
-            boxShadow: interrupted ? "none" : "0 0 8px var(--accent-cyan)",
+            background: "linear-gradient(90deg, var(--accent-blue), var(--accent-cyan))",
+            boxShadow: interrupted ? "none" : "0 0 8px var(--accent-blue)",
           }}
         />
       </div>

@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #e0e0e0;
-  --accent-cyan: #00ff66;
-  --accent-magenta: #ff8800;
-  --accent-yellow: #f0ff00;
-  --muted: #111111;
+  --background: #050308;
+  --foreground: #F0E6FF;
+  --accent-blue: #2E6BFF;
+  --accent-cyan: #00C2FF;
+  --accent-violet: #FF3DDB;
+  --accent-magenta: #FF3DDB;
+  --accent-yellow: #00C2FF;
+  --muted: #0E0A18;
+  --status-queued: #8A85A3;
 }
 
 @theme inline {
@@ -14,9 +17,11 @@
   --color-foreground: var(--foreground);
   --color-dark: #000000;
   --color-muted: #111111;
-  --color-cyan: #00ff66;
-  --color-magenta: #ff8800;
-  --color-yellow: #f0ff00;
+  --color-cyan: #2E6BFF;
+  --color-magenta: #FF3DDB;
+  --color-yellow: #00C2FF;
+  --color-blue: #2E6BFF;
+  --color-violet: #FF3DDB;
   --color-white: #e0e0e0;
   --font-sans: var(--font-inter);
   --font-pixel: var(--font-press-start);
@@ -43,11 +48,27 @@ body {
 }
 
 .box-glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), inset 0 0 20px rgba(0, 255, 102, 0.05);
+  box-shadow: 0 0 20px rgba(46, 107, 255, 0.3), inset 0 0 20px rgba(46, 107, 255, 0.05);
 }
 
 .box-glow-magenta {
-  box-shadow: 0 0 20px rgba(255, 136, 0, 0.3), inset 0 0 20px rgba(255, 136, 0, 0.05);
+  box-shadow: 0 0 20px rgba(255, 61, 219, 0.3), inset 0 0 20px rgba(255, 61, 219, 0.05);
+}
+
+.glow-blue {
+  text-shadow: 0 0 10px var(--accent-blue), 0 0 20px var(--accent-blue), 0 0 40px var(--accent-blue);
+}
+
+.glow-violet {
+  text-shadow: 0 0 10px var(--accent-violet), 0 0 20px var(--accent-violet), 0 0 40px var(--accent-violet);
+}
+
+.box-glow-blue {
+  box-shadow: 0 0 20px rgba(46, 107, 255, 0.3), inset 0 0 20px rgba(46, 107, 255, 0.05);
+}
+
+.box-glow-violet {
+  box-shadow: 0 0 20px rgba(255, 61, 219, 0.3), inset 0 0 20px rgba(255, 61, 219, 0.05);
 }
 
 /* Hover glow transition */
@@ -61,7 +82,7 @@ body {
 
 /* Cyberpunk border */
 .cyber-border {
-  border: 1px solid rgba(0, 255, 102, 0.3);
+  border: 1px solid rgba(46, 107, 255, 0.3);
   position: relative;
 }
 
@@ -154,7 +175,7 @@ body {
 
 /* Selection styling */
 ::selection {
-  background: var(--accent-magenta);
+  background: var(--accent-violet);
   color: var(--foreground);
 }
 
@@ -290,7 +311,6 @@ body {
   display: none !important;
 }
 
-
 /* Cyber icon animations */
 .cyber-icon {
   filter: drop-shadow(0 0 4px var(--accent-cyan));
@@ -348,7 +368,7 @@ body {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

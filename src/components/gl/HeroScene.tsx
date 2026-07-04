@@ -1,0 +1,536 @@
+"use client"
+
+import React, { useEffect, useMemo, useRef } from "react"
+import * as THREE from "three"
+import { useFrame } from "@react-three/fiber"
+import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import SceneCanvas from "@/components/gl/SceneCanvas"
+import { useQualityTier } from "@/lib/quality"
+import { usePointerState } from "@/lib/usePointer"
+
+// ─── Palette ────────────────────────────────────────────────────────────────
+const BLUE = new THREE.Color("#2E6BFF")
+const VIOLET = new THREE.Color("#FF3DDB")
+const CYAN = new THREE.Color("#00C2FF")
+
+// Field extent (world units) — camera sits at z = 6.
+const SPREAD_X = 9
+const SPREAD_Y = 5.5
+const SPREAD_Z = 3
+
+// ─── Shaders ──────────────────────────────────────────────────────────────
+const VERT = /* glsl */ `
+	uniform float uTime;
+	uniform vec3 uCursor;
+	uniform vec3 uRayDir;
+	uniform vec2 uCursorNdc;
+	uniform float uSize;
+	uniform float uDpr;
+	attribute float aRnd;
+	attribute vec2 aVel;
+	attribute vec2 aState; // x: collision glow, y: life (0 = gone)
+	varying float vRnd;
+	varying float vCore;
+	varying float vSpeed;
+	varying vec2 vDir;
+	varying float vGlow;
+	varying float vLife;
+
+	void main() {
+		vRnd = aRnd;
+		vGlow = aState.x;
+		vLife = aState.y;
+		vec3 p = position;
+
+		// gentle idle drift so the field never reads as static
+		float ph = aRnd * 6.2831853;
+		p.x += sin(uTime * 0.006 + ph) * 0.18;
+		p.y += cos(uTime * 0.0045 + ph) * 0.18;
+
+		// white-hot core only right at the void's edge (distance measured to
+		// the view ray through the cursor); farther out, original colors
+		float dist3 = length(cross(p - uCursor, uRayDir));
+		vCore = smoothstep(0.45, 0.2, dist3);
+
+		// motion in sprite space (sprite y runs down-screen, so flip world y)
+		vSpeed = length(aVel);
+		vDir = vSpeed > 1e-4 ? vec2(aVel.x, -aVel.y) / vSpeed : vec2(1.0, 0.0);
+
+		vec4 mv = modelViewMatrix * vec4(p, 1.0);
+		gl_Position = projectionMatrix * mv;
+
+		// screen-space event horizon: orbiters at other depths still project
+		// into the center, so the empty circle is enforced after projection
+		// (NDC radius 0.07 ≈ 32px at a 900px viewport)
+		float aspect = projectionMatrix[1][1] / projectionMatrix[0][0];
+		vec2 ndc = gl_Position.xy / gl_Position.w;
+		vec2 dv = (ndc - uCursorNdc) * vec2(aspect, 1.0);
+		float rdd = length(dv);
+		if (rdd < 0.07) {
+			dv *= 0.07 / max(rdd, 1e-4);
+			gl_Position.xy = (uCursorNdc + dv / vec2(aspect, 1.0)) * gl_Position.w;
+		}
+
+		// the sprite canvas itself stretches with speed (multiplicative — MUST
+		// equal the fragment's stretch factor so the streak fills the sprite
+		// lengthwise at constant width, never clipped square)
+		gl_PointSize = uSize * uDpr * (300.0 / -mv.z)
+			* (1.0 + vCore * 1.4 + vGlow * 1.5)
+			* (1.0 + min(vSpeed * 1.6, 4.0));
+	}
+`
+
+const FRAG = /* glsl */ `
+	uniform vec3 uBlue;
+	uniform vec3 uViolet;
+	uniform vec3 uCyan;
+	varying float vRnd;
+	varying float vCore;
+	varying float vSpeed;
+	varying vec2 vDir;
+	varying float vGlow;
+	varying float vLife;
+
+	void main() {
+		if (vLife <= 0.01) discard; // burned up in a collision — respawning
+		// rotate the sprite into the particle's motion frame, then stretch it
+		// along the travel axis — fast particles render as falling-star streaks
+		vec2 c = gl_PointCoord - 0.5;
+		vec2 perp = vec2(-vDir.y, vDir.x);
+		vec2 cr = vec2(dot(c, vDir), dot(c, perp));
+		// the shape fills the (already stretched) sprite along the motion axis
+		// and thins crosswise — nothing ever exceeds the sprite bounds
+		float stretch = 1.0 + min(vSpeed * 1.6, 4.0); // keep in sync with gl_PointSize
+		float d = length(vec2(cr.x, cr.y * stretch));
+		if (d > 0.5) discard;
+		float alpha = smoothstep(0.5, 0.0, d) * 0.75; // damped: additive stacking saturates fast
+		// comet anatomy: bright head forward, tail fading out behind
+		alpha *= mix(1.0, smoothstep(-0.5, 0.3, cr.x), min(vSpeed * 1.5, 1.0));
+		alpha *= vLife;
+		// richer spectrum: deep blue -> indigo -> violet, with per-dot brightness
+		vec3 col = mix(uBlue, vec3(0.48, 0.36, 1.0), smoothstep(0.0, 0.5, vRnd));
+		col = mix(col, uViolet, smoothstep(0.5, 1.0, vRnd));
+		// two brightness tiers: ~1 in 9 dots shines, the rest stay subdued
+		col *= 0.5 + 0.65 * step(0.89, fract(vRnd * 7.0));
+		col = mix(col, uCyan, step(0.93, vRnd) * 0.7); // sparse cyan accents
+		// white is strictly a near-void property: dots at the rim burn white,
+		// and streaks only whiten while they are close — far away they keep
+		// their original blue/violet
+		col = mix(col, vec3(1.0), vCore * 0.95);
+		col = mix(col, vec3(1.0), min(vSpeed * 0.6, 1.0) * vCore);
+		col = mix(col, vec3(1.0), vGlow); // collision flash
+		alpha = min(alpha * (1.0 + vGlow), 1.0);
+		gl_FragColor = vec4(col, alpha);
+	}
+`
+
+// ─── Cursor gravity-well tuning ─────────────────────────────────────────────
+const INFLUENCE = 2.2 // gravity-well radius (world units, xy cylinder — full depth)
+const VOID = 0.19 // event-horizon radius: kept empty around the cursor — keep the shader clamp in sync
+const VOID_KICK = 40 // ejection acceleration inside the void
+const RING_STIFF = 4.5 // pull toward each particle's own orbit radius
+const ORBIT_MIN = 0.28 // tightest orbit radius — the "photon ring" just outside the void
+const ORBIT_SPAN = 0.9 // extra radius drawn from the particle's random seed
+const SWIRL = 2.2 // tangential kick — makes captured particles orbit
+const SPRING = 2.6 // pull back to the home position
+const DAMPING = 3.0 // velocity decay per second
+const VMAX = 1.6 // speed cap (world units/s) — orbits stay smooth, nothing jumps
+
+// ─── Collision / burn-up tuning ─────────────────────────────────────────────
+const CELL = 0.06 // spatial-hash cell size for collision checks
+const COLLIDE_DIST = 0.05 // two live captured particles closer than this collide
+const COLLIDE_SPEED = 0.3 // minimum speed for a particle to take part in a collision
+const MAX_COLLISIONS = 3 // per frame — keeps the disc from evaporating
+const GLOW_DECAY = 2.5 // collision flash decay per second
+const DIE_TIME = 0.4 // seconds for the burned-up particle to fade out
+const DEAD_TIME = 2.5 // seconds it stays gone before respawning at home
+const REVIVE_TIME = 0.8 // seconds to fade back in
+
+// ─── Particle field ─────────────────────────────────────────────────────────
+function ParticleField(props: { count: number }): React.JSX.Element {
+	const { count } = props
+	const pointer = usePointerState()
+
+	const field = useMemo(() => {
+		const positions = new Float32Array(count * 3)
+		const rnd = new Float32Array(count)
+		// deterministic scatter — render must stay pure (no Math.random)
+		const hash = (n: number): number => {
+			const s = Math.sin(n * 127.1 + 311.7) * 43758.5453
+			return s - Math.floor(s)
+		}
+		for (let i = 0; i < count; i++) {
+			positions[i * 3 + 0] = (hash(i * 4 + 0) - 0.5) * 2 * SPREAD_X
+			positions[i * 3 + 1] = (hash(i * 4 + 1) - 0.5) * 2 * SPREAD_Y
+			positions[i * 3 + 2] = (hash(i * 4 + 2) - 0.5) * 2 * SPREAD_Z
+			rnd[i] = hash(i * 4 + 3)
+		}
+		const g = new THREE.BufferGeometry()
+		const posAttr = new THREE.BufferAttribute(positions, 3)
+		posAttr.setUsage(THREE.DynamicDrawUsage)
+		g.setAttribute("position", posAttr)
+		g.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 1))
+		const velAttr = new THREE.BufferAttribute(new Float32Array(count * 2), 2)
+		velAttr.setUsage(THREE.DynamicDrawUsage)
+		g.setAttribute("aVel", velAttr)
+		const state = new Float32Array(count * 2)
+		for (let i = 0; i < count; i++) state[i * 2 + 1] = 1 // glow 0, life 1
+		const stateAttr = new THREE.BufferAttribute(state, 2)
+		stateAttr.setUsage(THREE.DynamicDrawUsage)
+		g.setAttribute("aState", stateAttr)
+		return {
+			geometry: g,
+			homes: positions.slice(),
+			rnds: rnd,
+			// xyz offset + velocity per particle, integrated on the CPU each frame
+			offsets: new Float32Array(count * 3),
+			velocities: new Float32Array(count * 3),
+			// burn-up cycle: 0 alive, 1 dying, 2 dead, 3 reviving
+			phases: new Uint8Array(count),
+			timers: new Float32Array(count),
+			// collision spatial hash, reused every frame — no per-frame allocation
+			grid: new Map<number, number>(),
+		}
+	}, [count])
+	const geometry = field.geometry
+
+	const material = useMemo(
+		() =>
+			new THREE.ShaderMaterial({
+				uniforms: {
+					uTime: { value: 0 },
+					uCursor: { value: new THREE.Vector3(999, 999, 0) },
+					uRayDir: { value: new THREE.Vector3(0, 0, -1) },
+					uCursorNdc: { value: new THREE.Vector2(9, 9) },
+					uSize: { value: 0.093 },
+					uDpr: { value: 1 },
+					uBlue: { value: BLUE },
+					uViolet: { value: VIOLET },
+					uCyan: { value: CYAN },
+				},
+				vertexShader: VERT,
+				fragmentShader: FRAG,
+				transparent: true,
+				depthWrite: false,
+				blending: THREE.AdditiveBlending,
+			}),
+		[],
+	)
+
+	// dispose explicitly on unmount
+	useEffect(() => {
+		return () => {
+			geometry.dispose()
+			material.dispose()
+		}
+	}, [geometry, material])
+
+	// reusable scratch vectors — no per-frame allocation
+	const scratch = useMemo(
+		() => ({ ndc: new THREE.Vector3(), dir: new THREE.Vector3(), hit: new THREE.Vector3() }),
+		[],
+	)
+
+	// frame-loop writes go through refs — memoized values must not be reassigned directly
+	const uniformsRef = useRef<typeof material.uniforms | null>(null)
+	const fieldRef = useRef<typeof field | null>(null)
+	// fallback well anchor for touch devices / before the first pointer move
+	const anchorRef = useRef<HTMLElement | null>(null)
+	useEffect(() => {
+		uniformsRef.current = material.uniforms
+	}, [material])
+	useEffect(() => {
+		fieldRef.current = field
+	}, [field])
+	useEffect(() => {
+		anchorRef.current = document.getElementById("explore-cta")
+	}, [])
+
+	useFrame((state, delta) => {
+		const u = uniformsRef.current
+		const f = fieldRef.current
+		if (!u || !f) return
+		const p = pointer.current
+		u.uTime.value = state.clock.elapsedTime
+		u.uDpr.value = state.gl.getPixelRatio()
+
+		// well position: the pointer once it has moved; before that (and on
+		// touch devices, where the pointer stays inert) anchor on the EXPLORE
+		// button while it is on screen — otherwise park the well off-field
+		let ndcX: number | null = null
+		let ndcY: number | null = null
+		if (p.x !== 0 || p.y !== 0) {
+			ndcX = p.nx
+			ndcY = -p.ny
+		} else if (anchorRef.current) {
+			const rect = anchorRef.current.getBoundingClientRect()
+			const w = state.size.width
+			const h = state.size.height
+			if (rect.bottom > 0 && rect.top < h) {
+				ndcX = ((rect.left + rect.width / 2) / w) * 2 - 1
+				ndcY = -(((rect.top + rect.height / 2) / h) * 2 - 1)
+			}
+		}
+		let cx = 999
+		let cy = 999
+		// view-ray direction through the cursor — the well cylinder's axis,
+		// always perpendicular to the screen
+		let ux = 0
+		let uy = 0
+		let uz = -1
+		if (ndcX !== null && ndcY !== null) {
+			// project onto the z = 0 plane to get the world-space well position
+			scratch.ndc.set(ndcX, ndcY, 0.5).unproject(state.camera)
+			scratch.dir.copy(scratch.ndc).sub(state.camera.position).normalize()
+			const t = -state.camera.position.z / scratch.dir.z
+			scratch.hit.copy(state.camera.position).addScaledVector(scratch.dir, t)
+			cx = scratch.hit.x
+			cy = scratch.hit.y
+			ux = scratch.dir.x
+			uy = scratch.dir.y
+			uz = scratch.dir.z
+			u.uRayDir.value.copy(scratch.dir)
+			u.uCursorNdc.value.set(ndcX, ndcY)
+		} else {
+			u.uCursorNdc.value.set(9, 9)
+		}
+		u.uCursor.value.set(cx, cy, 0)
+
+		// gravity-well step: each captured particle is pulled onto its own orbit
+		// ring around the cursor point (3D, so capture is a sphere, not a column)
+		// and swirled tangentially; a damped spring returns it home afterwards
+		const dt = Math.min(delta, 0.05)
+		const decay = Math.exp(-DAMPING * dt)
+		const glowDecay = Math.exp(-GLOW_DECAY * dt)
+		const { homes, rnds, offsets, velocities, phases, timers, grid } = f
+		const posAttr = f.geometry.getAttribute("position") as THREE.BufferAttribute
+		const arr = posAttr.array as Float32Array
+		const velAttr = f.geometry.getAttribute("aVel") as THREE.BufferAttribute
+		const velArr = velAttr.array as Float32Array
+		const stateAttr = f.geometry.getAttribute("aState") as THREE.BufferAttribute
+		const stateArr = stateAttr.array as Float32Array
+		grid.clear()
+		let collisions = 0
+		let moved = false
+		for (let i = 0; i < count; i++) {
+			const ox = offsets[i * 3]
+			const oy = offsets[i * 3 + 1]
+			const oz = offsets[i * 3 + 2]
+			let vx = velocities[i * 3]
+			let vy = velocities[i * 3 + 1]
+			let vz = velocities[i * 3 + 2]
+			const px = homes[i * 3] + ox
+			const py = homes[i * 3 + 1] + oy
+			const pz = homes[i * 3 + 2] + oz
+			let ax = -ox * SPRING
+			let ay = -oy * SPRING
+			let az = -oz * SPRING
+			// distance to the view ray through the cursor: the well is a
+			// cylinder perpendicular to the screen — the same circle you see,
+			// at every depth
+			const wx = px - cx
+			const wy = py - cy
+			const wz = pz
+			const along = wx * ux + wy * uy + wz * uz
+			const rx = wx - ux * along
+			const ry = wy - uy * along
+			const rz = wz - uz * along
+			const dist = Math.sqrt(rx * rx + ry * ry + rz * rz)
+			if (dist < INFLUENCE) {
+				const t01 = 1 - dist / INFLUENCE
+				const force = t01 * t01 * (3 - 2 * t01) // smoothstep falloff
+				const ring = ORBIT_MIN + rnds[i] * ORBIT_SPAN
+				const inv = 1 / Math.max(dist, 0.1)
+				const nx = rx * inv
+				const ny = ry * inv
+				const nz = rz * inv
+				const radial = -(dist - ring) * RING_STIFF * force
+				ax += nx * radial
+				ay += ny * radial
+				az += nz * radial
+				// swirl around the ray — a flat vortex facing the viewer
+				// (axis ⊥ n, so axis × n is already unit length)
+				const tx = uy * nz - uz * ny
+				const ty = uz * nx - ux * nz
+				const tz = ux * ny - uy * nx
+				ax += tx * SWIRL * force
+				ay += ty * SWIRL * force
+				az += tz * SWIRL * force
+				// event horizon: nothing survives inside the void — eject hard
+				if (dist < VOID * 1.3) {
+					const eject = (VOID * 1.3 - dist) * VOID_KICK
+					ax += nx * eject
+					ay += ny * eject
+					az += nz * eject
+				}
+			}
+			vx = (vx + ax * dt) * decay
+			vy = (vy + ay * dt) * decay
+			vz = (vz + az * dt) * decay
+			// hard speed cap — fast approaches become smooth dives, never jumps
+			const sp2 = vx * vx + vy * vy + vz * vz
+			if (sp2 > VMAX * VMAX) {
+				const s = VMAX / Math.sqrt(sp2)
+				vx *= s
+				vy *= s
+				vz *= s
+			}
+			const nox = ox + vx * dt
+			const noy = oy + vy * dt
+			const noz = oz + vz * dt
+			offsets[i * 3] = nox
+			offsets[i * 3 + 1] = noy
+			offsets[i * 3 + 2] = noz
+			velocities[i * 3] = vx
+			velocities[i * 3 + 1] = vy
+			velocities[i * 3 + 2] = vz
+			arr[i * 3] = homes[i * 3] + nox
+			arr[i * 3 + 1] = homes[i * 3 + 1] + noy
+			arr[i * 3 + 2] = homes[i * 3 + 2] + noz
+			velArr[i * 2] = vx
+			velArr[i * 2 + 1] = vy
+
+			// collision flash decays; life follows the dying → dead → reviving cycle
+			const glow = stateArr[i * 2] * glowDecay
+			let life = stateArr[i * 2 + 1]
+			const phase = phases[i]
+			if (phase === 1) {
+				life -= dt / DIE_TIME
+				if (life <= 0) {
+					life = 0
+					phases[i] = 2
+					timers[i] = 0
+					// respawn at home, at rest
+					offsets[i * 3] = 0
+					offsets[i * 3 + 1] = 0
+					offsets[i * 3 + 2] = 0
+					velocities[i * 3] = 0
+					velocities[i * 3 + 1] = 0
+					velocities[i * 3 + 2] = 0
+				}
+			} else if (phase === 2) {
+				timers[i] += dt
+				if (timers[i] >= DEAD_TIME) phases[i] = 3
+			} else if (phase === 3) {
+				life += dt / REVIVE_TIME
+				if (life >= 1) {
+					life = 1
+					phases[i] = 0
+				}
+			}
+			stateArr[i * 2] = glow
+			stateArr[i * 2 + 1] = life
+
+			// spatial-hash collisions among fast, live, captured particles:
+			// the second of two occupants of a cell burns up, the first flares
+			if (
+				phase === 0 &&
+				dist < INFLUENCE &&
+				collisions < MAX_COLLISIONS &&
+				vx * vx + vy * vy + vz * vz > COLLIDE_SPEED * COLLIDE_SPEED
+			) {
+				const kx = Math.floor((px - cx) / CELL) + 64
+				const ky = Math.floor((py - cy) / CELL) + 64
+				const kz = Math.floor(pz / CELL) + 64
+				const key = kx | (ky << 8) | (kz << 16)
+				const other = grid.get(key)
+				if (other === undefined) {
+					grid.set(key, i)
+				} else if (phases[other] === 0) {
+					const ddx = arr[other * 3] - arr[i * 3]
+					const ddy = arr[other * 3 + 1] - arr[i * 3 + 1]
+					const ddz = arr[other * 3 + 2] - arr[i * 3 + 2]
+					if (ddx * ddx + ddy * ddy + ddz * ddz < COLLIDE_DIST * COLLIDE_DIST) {
+						collisions++
+						phases[i] = 1 // this one burns up
+						stateArr[other * 2] = 1 // the survivor flares white-hot…
+						const odx = arr[other * 3] - cx
+						const ody = arr[other * 3 + 1] - cy
+						const oinv = 1 / Math.max(Math.hypot(odx, ody), 0.1)
+						velocities[other * 3] += odx * oinv * 1.2 // …and gets flung outward
+						velocities[other * 3 + 1] += ody * oinv * 1.2
+					}
+				}
+			}
+
+			if (
+				!moved &&
+				(Math.abs(vx) > 1e-4 || Math.abs(vy) > 1e-4 || Math.abs(vz) > 1e-4 || phases[i] !== 0 || glow > 1e-3)
+			)
+				moved = true
+		}
+		if (moved) {
+			posAttr.needsUpdate = true
+			velAttr.needsUpdate = true
+			stateAttr.needsUpdate = true
+		}
+	})
+
+	return <points geometry={geometry} material={material} frustumCulled={false} />
+}
+
+// ─── Wireframe horizon grid ──────────────────────────────────────────────────
+function GridHorizon(): React.JSX.Element {
+	const ref = useRef<THREE.GridHelper>(null)
+	const grid = useMemo(() => {
+		const g = new THREE.GridHelper(60, 60, "#FF3DDB", "#4A3A8A")
+		const m = g.material as THREE.LineBasicMaterial
+		m.transparent = true
+		m.opacity = 0.09
+		m.depthWrite = false
+		return g
+	}, [])
+
+	useEffect(() => {
+		return () => {
+			grid.geometry.dispose()
+			;(grid.material as THREE.LineBasicMaterial).dispose()
+		}
+	}, [grid])
+
+	return <primitive ref={ref} object={grid} position={[0, -5, -2]} />
+}
+
+// ─── Camera parallax driver ──────────────────────────────────────────────────
+function CameraParallax(): null {
+	const pointer = usePointerState()
+	useFrame((state) => {
+		const p = pointer.current
+		const cam = state.camera
+		cam.position.x += (p.lnx * 0.9 - cam.position.x) * 0.06
+		cam.position.y += (-p.lny * 0.7 - cam.position.y) * 0.06
+		cam.lookAt(0, 0, 0)
+	})
+	return null
+}
+
+// ─── Public component ────────────────────────────────────────────────────────
+export default function HeroScene(): React.JSX.Element | null {
+	const tier = useQualityTier()
+	if (tier === "off") return null
+
+	const count = tier === "high" ? 6000 : 1500
+
+	return (
+		<SceneCanvas
+			className="absolute inset-0 h-full w-full"
+			camera={{ position: [0, 0, 6], fov: 60, near: 0.1, far: 100 }}
+		>
+			{/* opaque scene bg: EffectComposer output composites white over a transparent canvas */}
+			<color attach="background" args={["#050308"]} />
+			<GridHorizon />
+			<ParticleField count={count} />
+			<CameraParallax />
+			{tier === "high" && (
+				<EffectComposer>
+					<Bloom
+						intensity={0.9}
+						luminanceThreshold={0.15}
+						luminanceSmoothing={0.9}
+						mipmapBlur
+					/>
+				</EffectComposer>
+			)}
+		</SceneCanvas>
+	)
+}

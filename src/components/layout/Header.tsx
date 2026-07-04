@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMagnetic } from "@/lib/motion";
 
 const navLinks = [
   { href: "/journey", label: "JOURNEY", matchPrefixes: ["/journey"] },
@@ -21,8 +22,15 @@ export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Fixed-length hook calls (navLinks is a static 4-entry array) — safe per rules of hooks.
+  const magnetic0 = useMagnetic<HTMLAnchorElement>();
+  const magnetic1 = useMagnetic<HTMLAnchorElement>();
+  const magnetic2 = useMagnetic<HTMLAnchorElement>();
+  const magnetic3 = useMagnetic<HTMLAnchorElement>();
+  const magneticRefs = [magnetic0, magnetic1, magnetic2, magnetic3];
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-dark/80 backdrop-blur-md border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-[var(--background)]/90 via-[var(--background)]/40 to-transparent">
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -36,14 +44,15 @@ export default function Header() {
 
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {navLinks.map((link, i) => (
               <Link
                 key={link.href}
+                ref={magneticRefs[i]}
                 href={link.href}
                 className={`relative font-mono text-xs tracking-wider transition-all duration-300 ${
                   isActive(pathname, link)
-                    ? "text-cyan glow-cyan"
-                    : "text-white/60 hover:text-cyan neon-underline"
+                    ? "text-blue glow-blue"
+                    : "text-white/60 hover:text-[var(--accent-cyan)] neon-underline"
                 }`}
               >
                 {link.label}
@@ -83,8 +92,8 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
               className={`px-6 py-4 font-mono text-xs tracking-wider border-b border-white/5 transition-all duration-300 ${
                 isActive(pathname, link)
-                  ? "text-cyan glow-cyan bg-cyan/5"
-                  : "text-white/60 hover:text-cyan hover:bg-white/5"
+                  ? "text-blue glow-blue bg-blue/5"
+                  : "text-white/60 hover:text-[var(--accent-cyan)] hover:bg-white/5"
               }`}
             >
               {link.label}
