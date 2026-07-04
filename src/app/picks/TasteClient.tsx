@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Flip } from "gsap/Flip";
-import { useFrame } from "@react-three/fiber";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RecommendationCard from "@/components/ui/RecommendationCard";
-import SceneCanvas from "@/components/gl/SceneCanvas";
-import { useQualityTier } from "@/lib/quality";
 import { recommendations, type Category } from "@/data/mock/recommendations";
+
+const HeroScene = dynamic(() => import("@/components/gl/HeroScene"), { ssr: false });
 
 if (typeof window !== "undefined") {
 	gsap.registerPlugin(Flip);
@@ -26,57 +25,11 @@ const CATEGORIES: Array<{ value: Category | "all"; label: string }> = [
 	{ value: "food", label: "FOOD" },
 ];
 
-// Low-density ambient particle drift behind the grid — high tier only.
-function AmbientParticles() {
-	const pointsRef = useRef<THREE.Points>(null);
-
-	const geometry = useMemo(() => {
-		// Deterministic pseudo-random scatter (avoids impure Math.random() during render).
-		const count = 40;
-		const positions = new Float32Array(count * 3);
-		for (let i = 0; i < count; i++) {
-			positions[i * 3 + 0] = Math.sin(i * 12.9898) * 6;
-			positions[i * 3 + 1] = Math.cos(i * 78.233) * 6;
-			positions[i * 3 + 2] = Math.sin(i * 37.719) * 2;
-		}
-		const g = new THREE.BufferGeometry();
-		g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-		return g;
-	}, []);
-
-	const material = useMemo(
-		() =>
-			new THREE.PointsMaterial({
-				color: "#2E6BFF",
-				size: 0.04,
-				transparent: true,
-				opacity: 0.45,
-				sizeAttenuation: true,
-				depthWrite: false,
-			}),
-		[],
-	);
-
-	useEffect(() => {
-		return () => {
-			geometry.dispose();
-			material.dispose();
-		};
-	}, [geometry, material]);
-
-	useFrame((state) => {
-		if (pointsRef.current) pointsRef.current.rotation.y = state.clock.elapsedTime * 0.015;
-	});
-
-	return <points ref={pointsRef} geometry={geometry} material={material} frustumCulled={false} />;
-}
-
 export default function TasteClient() {
 	const [selectedCategory, setSelectedCategory] = useState<Category | "all">("all");
 	const [exactRating, setExactRating] = useState<number>(0);
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 
-	const tier = useQualityTier();
 	const gridRef = useRef<HTMLDivElement>(null);
 	const flipStateRef = useRef<Flip.FlipState | null>(null);
 	const flipTweenRef = useRef<gsap.core.Timeline | null>(null);
@@ -139,6 +92,12 @@ export default function TasteClient() {
 
 	return (
 		<div className="min-h-screen bg-dark cyber-grid flex flex-col">
+			{/* Fixed particle background — same gravity-well field as the homepage */}
+			<div className="fixed inset-0 z-0" aria-hidden="true">
+				<HeroScene />
+			</div>
+
+			<div className="relative z-10 flex flex-col flex-1">
 			<Header />
 
 			<main className="flex-1 pt-32 pb-24">
@@ -206,15 +165,6 @@ export default function TasteClient() {
 
 					{/* Recommendations Grid */}
 					<div className="relative">
-						{tier === "high" && (
-							<SceneCanvas
-								className="absolute inset-0 -z-10 pointer-events-none"
-								camera={{ position: [0, 0, 6], fov: 50 }}
-							>
-								<AmbientParticles />
-							</SceneCanvas>
-						)}
-
 						<div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							{filteredRecommendations.map((recommendation) => (
 								<div
@@ -245,6 +195,7 @@ export default function TasteClient() {
 			</main>
 
 			<Footer />
+			</div>
 		</div>
 	);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Header from "@/components/layout/Header";
@@ -8,6 +9,8 @@ import Footer from "@/components/layout/Footer";
 import { projects, type ProjectStatus } from "@/data/mock/projects";
 import ProjectCard from "@/components/ui/ProjectCard";
 import ProjectDetail from "@/components/ui/ProjectDetail";
+
+const HeroScene = dynamic(() => import("@/components/gl/HeroScene"), { ssr: false });
 
 type FilterOption = "all" | ProjectStatus;
 
@@ -108,6 +111,12 @@ export default function ProjectsClient() {
 
 	return (
 		<div className="min-h-screen bg-dark cyber-grid flex flex-col">
+			{/* Fixed particle background — same gravity-well field as the homepage */}
+			<div className="fixed inset-0 z-0" aria-hidden="true">
+				<HeroScene />
+			</div>
+
+			<div className="relative z-10 flex flex-col flex-1">
 			<Header />
 
 			<main className="flex-1 pt-32 pb-24">
@@ -184,6 +193,7 @@ export default function ProjectsClient() {
 			</main>
 
 			<Footer />
+			</div>
 		</div>
 	);
 }

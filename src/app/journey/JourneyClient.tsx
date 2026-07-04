@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Timeline, { TimelineHandle } from "@/components/ui/Timeline";
 import { journeyData, JourneyEntry } from "@/data/mock/cv";
+
+const HeroScene = dynamic(() => import("@/components/gl/HeroScene"), { ssr: false });
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "YOUR_MAPBOX_TOKEN";
 
@@ -103,6 +106,26 @@ export default function JourneyClient() {
 						type: "vector",
 						url: "mapbox://mapbox.mapbox-streets-v8",
 					},
+					land: {
+						type: "geojson",
+						data: "/data/land-mask.geojson",
+					},
+					rivers: {
+						type: "geojson",
+						data: "/data/rivers.geojson",
+					},
+					urban: {
+						type: "geojson",
+						data: "/data/urban.geojson",
+					},
+					cities: {
+						type: "geojson",
+						data: "/data/cities.geojson",
+					},
+					graticule: {
+						type: "geojson",
+						data: "/data/graticule.geojson",
+					},
 					markers: {
 						type: "geojson",
 						data: { type: "FeatureCollection", features: markerFeatures },
@@ -113,33 +136,56 @@ export default function JourneyClient() {
 					},
 				},
 				layers: [
-					// Background — site base tone
+					// Land mask — opaque over land; sea and lakes stay transparent
+					// so the particle field behind the map shows through
 					{
-						id: "background",
-						type: "background",
-						paint: { "background-color": "#050308" },
-					},
-					// Ocean/sea only (no lakes/rivers)
-					{
-						id: "water",
+						id: "land",
 						type: "fill",
-						source: "mapbox-streets",
-						"source-layer": "water",
-						filter: ["!", ["coalesce", ["get", "class"], false]],
-						paint: { "fill-color": "transparent" },
+						source: "land",
+						paint: { "fill-color": "#050308" },
 					},
-					// Coastlines (ocean only)
+					// Urban areas — faint gray glow, night-side city footprints
 					{
-						id: "water-outline",
+						id: "urban-areas",
+						type: "fill",
+						source: "urban",
+						paint: {
+							"fill-color": "#8A85A3",
+							"fill-opacity": 0.15,
+						},
+					},
+					// Graticule — faint lat/lon grid, tactical-display texture
+					{
+						id: "graticule",
 						type: "line",
-						source: "mapbox-streets",
-						"source-layer": "water",
-						filter: ["!", ["coalesce", ["get", "class"], false]],
+						source: "graticule",
+						paint: {
+							"line-color": "#7FB0FF",
+							"line-width": 0.5,
+							"line-opacity": 0.07,
+						},
+					},
+					// Coastlines + lake shores (same geometry as the mask, so they align)
+					{
+						id: "coastline",
+						type: "line",
+						source: "land",
 						paint: {
 							"line-color": "#7FB0FF",
 							"line-width": 0.8,
 							"line-opacity": 0.5,
 							"line-dasharray": [4, 3],
+						},
+					},
+					// Rivers — inland water lines over the land mask
+					{
+						id: "rivers",
+						type: "line",
+						source: "rivers",
+						paint: {
+							"line-color": "#7FB0FF",
+							"line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 6, 1.4],
+							"line-opacity": 0.55,
 						},
 					},
 					// Country boundaries
@@ -168,6 +214,39 @@ export default function JourneyClient() {
 							"line-width": 0.5,
 							"line-opacity": 0.22,
 							"line-dasharray": [3, 3],
+						},
+					},
+					// City dots — major populated places
+					{
+						id: "city-dots",
+						type: "circle",
+						source: "cities",
+						paint: {
+							"circle-radius": ["case", ["<=", ["get", "rank"], 1], 1.8, 1.2],
+							"circle-color": "#B9AEE0",
+							"circle-opacity": 0.55,
+						},
+					},
+					// City labels — appear when zoomed in
+					{
+						id: "city-labels",
+						type: "symbol",
+						source: "cities",
+						minzoom: 4,
+						layout: {
+							"text-field": ["get", "name"],
+							"text-font": ["DIN Offc Pro Regular"],
+							"text-size": 9,
+							"text-transform": "uppercase",
+							"text-letter-spacing": 0.15,
+							"text-anchor": "top",
+							"text-offset": [0, 0.6],
+						},
+						paint: {
+							"text-color": "#8A85A3",
+							"text-opacity": 0.75,
+							"text-halo-color": "#050308",
+							"text-halo-width": 1,
 						},
 					},
 					// Marker glow (outer)
@@ -223,7 +302,7 @@ export default function JourneyClient() {
 				],
 			},
 			center: [10, 45],
-			zoom: 3,
+			zoom: 1.6,
 			interactive: false,
 		});
 
@@ -268,7 +347,7 @@ export default function JourneyClient() {
 			map.current?.flyTo({
 				center: liveEntry.coordinates,
 				zoom: 5,
-				duration: 2000,
+				duration: 3200,
 			});
 			showLocationIndicator(liveEntry);
 		}, 1800);
@@ -287,8 +366,9 @@ export default function JourneyClient() {
 
 	return (
 		<div className="min-h-screen bg-dark flex flex-col">
-			{/* Fixed map background — covers entire viewport */}
-			<div className="fixed inset-0 z-0">
+			{/* Fixed background — particle field behind, map (transparent water) on top */}
+			<div className="fixed inset-0 z-0 bg-[#050308]">
+				<HeroScene />
 				<div className="w-full h-full" ref={mapContainer} />
 			</div>
 

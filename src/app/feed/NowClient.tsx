@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { Points as ThreePoints } from "three";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { TextPlugin } from "gsap/TextPlugin";
-import { useFrame } from "@react-three/fiber";
-import { Points, PointMaterial } from "@react-three/drei";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CyberLoader from "@/components/ui/CyberLoader";
-import SceneCanvas from "@/components/gl/SceneCanvas";
-import { useQualityTier } from "@/lib/quality";
+
+const HeroScene = dynamic(() => import("@/components/gl/HeroScene"), { ssr: false });
 
 let textPluginRegistered = false;
 function ensureTextPlugin() {
@@ -19,8 +17,6 @@ function ensureTextPlugin() {
 	textPluginRegistered = true;
 }
 
-const PARTICLE_COUNT = 200;
-
 const TERMINAL_LINES = [
 	"$ feed --sync --source obsidian",
 	"Establishing secure connection...",
@@ -28,48 +24,8 @@ const TERMINAL_LINES = [
 	"Retry scheduled",
 ];
 
-// Deterministic pseudo-random hash (pure — safe to call during render).
-function hash(seed: number) {
-	const x = Math.sin(seed * 127.1) * 43758.5453123;
-	return x - Math.floor(x);
-}
-
-function DriftParticles() {
-	const ref = useRef<ThreePoints>(null);
-
-	const positions = useMemo(() => {
-		const arr = new Float32Array(PARTICLE_COUNT * 3);
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			arr[i * 3] = (hash(i * 3 + 1) - 0.5) * 4.5;
-			arr[i * 3 + 1] = (hash(i * 3 + 2) - 0.5) * 3;
-			arr[i * 3 + 2] = (hash(i * 3 + 3) - 0.5) * 2;
-		}
-		return arr;
-	}, []);
-
-	useFrame((_, delta) => {
-		if (!ref.current) return;
-		ref.current.rotation.y += delta * 0.04;
-		ref.current.rotation.x += delta * 0.012;
-	});
-
-	return (
-		<Points ref={ref} positions={positions} stride={3}>
-			<PointMaterial
-				transparent
-				color="#2E6BFF"
-				size={0.03}
-				sizeAttenuation
-				depthWrite={false}
-				opacity={0.5}
-			/>
-		</Points>
-	);
-}
-
 export default function NowClient() {
 	const [showTerminal, setShowTerminal] = useState(false);
-	const tier = useQualityTier();
 
 	const line1Ref = useRef<HTMLParagraphElement>(null);
 	const line2Ref = useRef<HTMLParagraphElement>(null);
@@ -103,6 +59,12 @@ export default function NowClient() {
 
 	return (
 		<div className="min-h-screen bg-dark cyber-grid flex flex-col">
+			{/* Fixed particle background — same gravity-well field as the homepage */}
+			<div className="fixed inset-0 z-0" aria-hidden="true">
+				<HeroScene />
+			</div>
+
+			<div className="relative z-10 flex flex-col flex-1">
 			<Header />
 
 			<main className="flex-1 pt-32 pb-24">
@@ -122,16 +84,6 @@ export default function NowClient() {
 
 					{/* Loader + terminal */}
 					<div className="max-w-xl relative">
-						{tier === "high" && (
-							<SceneCanvas
-								className="absolute -inset-10 -z-10 pointer-events-none"
-								camera={{ position: [0, 0, 3], fov: 50 }}
-							>
-								<ambientLight intensity={0.6} />
-								<DriftParticles />
-							</SceneCanvas>
-						)}
-
 						<div className="relative border border-blue/30 bg-dark/90 box-glow-blue">
 							{/* Terminal title bar */}
 							<div className="flex items-center gap-2 border-b border-blue/20 bg-blue/5 px-4 py-2">
@@ -162,6 +114,7 @@ export default function NowClient() {
 			</main>
 
 			<Footer />
+			</div>
 		</div>
 	);
 }
