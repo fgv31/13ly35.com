@@ -7,6 +7,11 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import SceneCanvas from "@/components/gl/SceneCanvas"
 import { useQualityTier } from "@/lib/quality"
 import { usePointerState } from "@/lib/usePointer"
+import { sampleFlow, type FlowField } from "@/lib/flowField"
+
+// optional external force field (e.g. the journey map's coastal currents) —
+// owned by the page, read every frame; null means no flow
+export type FlowFieldRef = React.MutableRefObject<FlowField | null>
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 const BLUE = new THREE.Color("#2E6BFF")
@@ -29,17 +34,20 @@ const VERT = /* glsl */ `
 	attribute float aRnd;
 	attribute vec2 aVel;
 	attribute vec2 aState; // x: collision glow, y: life (0 = gone)
+	attribute vec2 aStar; // x: starlight whiteness, y: size multiplier
 	varying float vRnd;
 	varying float vCore;
 	varying float vSpeed;
 	varying vec2 vDir;
 	varying float vGlow;
 	varying float vLife;
+	varying float vWhite;
 
 	void main() {
 		vRnd = aRnd;
 		vGlow = aState.x;
 		vLife = aState.y;
+		vWhite = aStar.x;
 		vec3 p = position;
 
 		// gentle idle drift so the field never reads as static
@@ -74,7 +82,7 @@ const VERT = /* glsl */ `
 		// the sprite canvas itself stretches with speed (multiplicative — MUST
 		// equal the fragment's stretch factor so the streak fills the sprite
 		// lengthwise at constant width, never clipped square)
-		gl_PointSize = uSize * uDpr * (300.0 / -mv.z)
+		gl_PointSize = uSize * uDpr * (300.0 / -mv.z) * aStar.y
 			* (1.0 + vCore * 1.4 + vGlow * 1.5)
 			* (1.0 + min(vSpeed * 1.6, 4.0));
 	}
@@ -90,6 +98,7 @@ const FRAG = /* glsl */ `
 	varying vec2 vDir;
 	varying float vGlow;
 	varying float vLife;
+	varying float vWhite;
 
 	void main() {
 		if (vLife <= 0.01) discard; // burned up in a collision — respawning
@@ -107,12 +116,15 @@ const FRAG = /* glsl */ `
 		// comet anatomy: bright head forward, tail fading out behind
 		alpha *= mix(1.0, smoothstep(-0.5, 0.3, cr.x), min(vSpeed * 1.5, 1.0));
 		alpha *= vLife;
-		// richer spectrum: deep blue -> indigo -> violet, with per-dot brightness
+		// nebula spectrum: deep blue -> indigo -> violet, with per-dot brightness
 		vec3 col = mix(uBlue, vec3(0.48, 0.36, 1.0), smoothstep(0.0, 0.5, vRnd));
 		col = mix(col, uViolet, smoothstep(0.5, 1.0, vRnd));
 		// two brightness tiers: ~1 in 9 dots shines, the rest stay subdued
 		col *= 0.5 + 0.65 * step(0.89, fract(vRnd * 7.0));
 		col = mix(col, uCyan, step(0.93, vRnd) * 0.7); // sparse cyan accents
+		// night sky: most dots lean toward pale starlight; a few warm giants
+		col = mix(col, vec3(0.88, 0.91, 1.0), vWhite);
+		col = mix(col, vec3(1.0, 0.78, 0.5), step(0.965, fract(vRnd * 13.0)) * 0.85);
 		// white is strictly a near-void property: dots at the rim burn white,
 		// and streaks only whiten while they are close — far away they keep
 		// their original blue/violet
@@ -146,30 +158,77 @@ const DIE_TIME = 0.4 // seconds for the burned-up particle to fade out
 const DEAD_TIME = 2.5 // seconds it stays gone before respawning at home
 const REVIVE_TIME = 0.8 // seconds to fade back in
 
+// ─── Flow advection tuning ──────────────────────────────────────────────────
+const FLOW_SMOOTH = 2.5 // home-velocity easing toward the sampled current
+const FLOW_WRAP = 1.15 // NDC bound — homes drifting past re-enter opposite side
+
 // ─── Particle field ─────────────────────────────────────────────────────────
-function ParticleField(props: { count: number }): React.JSX.Element {
-	const { count } = props
+function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX.Element {
+	const { count, flow } = props
 	const pointer = usePointerState()
 
 	const field = useMemo(() => {
 		const positions = new Float32Array(count * 3)
 		const rnd = new Float32Array(count)
+		// star look: x = whiteness (0 = nebula palette, 1 = starlight), y = size
+		const starAttr = new Float32Array(count * 2)
 		// deterministic scatter — render must stay pure (no Math.random)
 		const hash = (n: number): number => {
 			const s = Math.sin(n * 127.1 + 311.7) * 43758.5453
 			return s - Math.floor(s)
 		}
+		// gaussian from two hashes (Box–Muller) — for galactic structure
+		const gauss = (a: number, b: number): number =>
+			Math.sqrt(-2 * Math.log(Math.max(hash(a), 1e-6))) * Math.cos(6.2831853 * hash(b))
+		// a handful of galaxy clusters, deterministically placed and elongated
+		const CLUSTERS = 6
 		for (let i = 0; i < count; i++) {
-			positions[i * 3 + 0] = (hash(i * 4 + 0) - 0.5) * 2 * SPREAD_X
-			positions[i * 3 + 1] = (hash(i * 4 + 1) - 0.5) * 2 * SPREAD_Y
-			positions[i * 3 + 2] = (hash(i * 4 + 2) - 0.5) * 2 * SPREAD_Z
+			const kind = hash(i * 7 + 5)
+			let x: number
+			let y: number
+			let z = (hash(i * 4 + 2) - 0.5) * 2 * SPREAD_Z
+			let white: number
+			let size = 0.55 + hash(i * 7 + 6) * 0.75
+			if (kind < 0.5) {
+				// lone field stars — uniform sky
+				x = (hash(i * 4 + 0) - 0.5) * 2 * SPREAD_X
+				y = (hash(i * 4 + 1) - 0.5) * 2 * SPREAD_Y
+				white = 0.35 + hash(i * 7 + 1) * 0.45
+				// a few bright naked-eye stars in an otherwise faint field
+				size *= hash(i * 9 + 4) > 0.92 ? 1.7 : 0.75
+			} else if (kind < 0.78) {
+				// the milky way — a hazy diagonal band across the whole sky
+				x = (hash(i * 4 + 0) - 0.5) * 2.4 * SPREAD_X
+				y = x * 0.34 + gauss(i * 9 + 1, i * 9 + 2) * 0.85
+				white = 0.6 + hash(i * 7 + 2) * 0.4
+				size *= 0.6 // dense but fine dust
+			} else {
+				// galaxy clusters — tight elliptical blobs
+				const c = Math.floor(hash(i * 11 + 3) * CLUSTERS)
+				const cx = (hash(c * 31 + 7) - 0.5) * 2 * SPREAD_X * 0.85
+				const cy = (hash(c * 37 + 11) - 0.5) * 2 * SPREAD_Y * 0.85
+				const cz = (hash(c * 41 + 13) - 0.5) * 2 * SPREAD_Z * 0.6
+				const ex = 0.25 + hash(c * 43 + 17) * 0.55
+				const ey = 0.2 + hash(c * 47 + 19) * 0.4
+				x = cx + gauss(i * 13 + 1, i * 13 + 2) * ex
+				y = cy + gauss(i * 13 + 3, i * 13 + 4) * ey
+				z = cz + gauss(i * 13 + 5, i * 13 + 6) * 0.25
+				white = 0.3 + hash(i * 7 + 3) * 0.4
+				size *= 0.85
+			}
+			positions[i * 3 + 0] = x
+			positions[i * 3 + 1] = y
+			positions[i * 3 + 2] = z
 			rnd[i] = hash(i * 4 + 3)
+			starAttr[i * 2 + 0] = white
+			starAttr[i * 2 + 1] = size
 		}
 		const g = new THREE.BufferGeometry()
 		const posAttr = new THREE.BufferAttribute(positions, 3)
 		posAttr.setUsage(THREE.DynamicDrawUsage)
 		g.setAttribute("position", posAttr)
 		g.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 1))
+		g.setAttribute("aStar", new THREE.BufferAttribute(starAttr, 2))
 		const velAttr = new THREE.BufferAttribute(new Float32Array(count * 2), 2)
 		velAttr.setUsage(THREE.DynamicDrawUsage)
 		g.setAttribute("aVel", velAttr)
@@ -185,6 +244,8 @@ function ParticleField(props: { count: number }): React.JSX.Element {
 			// xyz offset + velocity per particle, integrated on the CPU each frame
 			offsets: new Float32Array(count * 3),
 			velocities: new Float32Array(count * 3),
+			// xy drift of the home itself, driven by the external flow field
+			homeVels: new Float32Array(count * 2),
 			// burn-up cycle: 0 alive, 1 dying, 2 dead, 3 reviving
 			phases: new Uint8Array(count),
 			timers: new Float32Array(count),
@@ -227,7 +288,13 @@ function ParticleField(props: { count: number }): React.JSX.Element {
 
 	// reusable scratch vectors — no per-frame allocation
 	const scratch = useMemo(
-		() => ({ ndc: new THREE.Vector3(), dir: new THREE.Vector3(), hit: new THREE.Vector3() }),
+		() => ({
+			ndc: new THREE.Vector3(),
+			dir: new THREE.Vector3(),
+			hit: new THREE.Vector3(),
+			proj: new THREE.Matrix4(),
+			flowOut: { x: 0, y: 0 },
+		}),
 		[],
 	)
 
@@ -302,7 +369,22 @@ function ParticleField(props: { count: number }): React.JSX.Element {
 		const dt = Math.min(delta, 0.05)
 		const decay = Math.exp(-DAMPING * dt)
 		const glowDecay = Math.exp(-GLOW_DECAY * dt)
-		const { homes, rnds, offsets, velocities, phases, timers, grid } = f
+		const { homes, rnds, offsets, velocities, homeVels, phases, timers, grid } = f
+
+		// coastal flow: homes drift with the current sampled at their screen
+		// position — particles follow through their spring, so the streams stay
+		// soft; zero cost when no flow field is attached
+		const fl = flow?.current ?? null
+		let projE: ArrayLike<number> | null = null
+		let tanHalfFov = 0
+		let camAspect = 1
+		if (fl) {
+			scratch.proj.multiplyMatrices(state.camera.projectionMatrix, state.camera.matrixWorldInverse)
+			projE = scratch.proj.elements
+			const cam = state.camera as THREE.PerspectiveCamera
+			tanHalfFov = Math.tan((cam.fov * Math.PI) / 360)
+			camAspect = cam.aspect
+		}
 		const posAttr = f.geometry.getAttribute("position") as THREE.BufferAttribute
 		const arr = posAttr.array as Float32Array
 		const velAttr = f.geometry.getAttribute("aVel") as THREE.BufferAttribute
@@ -313,6 +395,35 @@ function ParticleField(props: { count: number }): React.JSX.Element {
 		let collisions = 0
 		let moved = false
 		for (let i = 0; i < count; i++) {
+			if (fl && projE) {
+				const hx = homes[i * 3]
+				const hy = homes[i * 3 + 1]
+				const hz = homes[i * 3 + 2]
+				const cw = projE[3] * hx + projE[7] * hy + projE[11] * hz + projE[15]
+				if (cw > 1e-4) {
+					const hnx = (projE[0] * hx + projE[4] * hy + projE[8] * hz + projE[12]) / cw
+					const hny = (projE[1] * hx + projE[5] * hy + projE[9] * hz + projE[13]) / cw
+					// NDC → world units at this home's depth
+					const halfH = Math.max(state.camera.position.z - hz, 0.5) * tanHalfFov
+					const halfW = halfH * camAspect
+					sampleFlow(fl, hnx, hny, scratch.flowOut)
+					const k = 1 - Math.exp(-FLOW_SMOOTH * dt)
+					let hvx = homeVels[i * 2]
+					let hvy = homeVels[i * 2 + 1]
+					hvx += (scratch.flowOut.x * halfW - hvx) * k
+					hvy += (scratch.flowOut.y * halfH - hvy) * k
+					homeVels[i * 2] = hvx
+					homeVels[i * 2 + 1] = hvy
+					homes[i * 3] += hvx * dt
+					homes[i * 3 + 1] += hvy * dt
+					if (!moved && (Math.abs(hvx) > 1e-4 || Math.abs(hvy) > 1e-4)) moved = true
+					// drifted past the screen edge → re-enter on the opposite side
+					if (hnx > FLOW_WRAP) homes[i * 3] -= 2 * FLOW_WRAP * halfW
+					else if (hnx < -FLOW_WRAP) homes[i * 3] += 2 * FLOW_WRAP * halfW
+					if (hny > FLOW_WRAP) homes[i * 3 + 1] -= 2 * FLOW_WRAP * halfH
+					else if (hny < -FLOW_WRAP) homes[i * 3 + 1] += 2 * FLOW_WRAP * halfH
+				}
+			}
 			const ox = offsets[i * 3]
 			const oy = offsets[i * 3 + 1]
 			const oz = offsets[i * 3 + 2]
@@ -387,8 +498,9 @@ function ParticleField(props: { count: number }): React.JSX.Element {
 			arr[i * 3] = homes[i * 3] + nox
 			arr[i * 3 + 1] = homes[i * 3 + 1] + noy
 			arr[i * 3 + 2] = homes[i * 3 + 2] + noz
-			velArr[i * 2] = vx
-			velArr[i * 2 + 1] = vy
+			// streak visuals read total motion: swirl velocity + coastal drift
+			velArr[i * 2] = vx + homeVels[i * 2]
+			velArr[i * 2 + 1] = vy + homeVels[i * 2 + 1]
 
 			// collision flash decays; life follows the dying → dead → reviving cycle
 			const glow = stateArr[i * 2] * glowDecay
@@ -505,7 +617,8 @@ function CameraParallax(): null {
 }
 
 // ─── Public component ────────────────────────────────────────────────────────
-export default function HeroScene(): React.JSX.Element | null {
+export default function HeroScene(props: { flow?: FlowFieldRef } = {}): React.JSX.Element | null {
+	const { flow } = props
 	const tier = useQualityTier()
 	if (tier === "off") return null
 
@@ -519,7 +632,7 @@ export default function HeroScene(): React.JSX.Element | null {
 			{/* opaque scene bg: EffectComposer output composites white over a transparent canvas */}
 			<color attach="background" args={["#050308"]} />
 			<GridHorizon />
-			<ParticleField count={count} />
+			<ParticleField count={count} flow={flow} />
 			<CameraParallax />
 			{tier === "high" && (
 				<EffectComposer>

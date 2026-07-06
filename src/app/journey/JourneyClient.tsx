@@ -8,6 +8,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Timeline, { TimelineHandle } from "@/components/ui/Timeline";
 import { journeyData, JourneyEntry } from "@/data/mock/cv";
+import { computeFlowField, type FlowField } from "@/lib/flowField";
 
 const HeroScene = dynamic(() => import("@/components/gl/HeroScene"), { ssr: false });
 
@@ -45,6 +46,15 @@ export default function JourneyClient() {
 	const map = useRef<mapboxgl.Map | null>(null);
 	const timelineRef = useRef<TimelineHandle>(null);
 	const reticleAnim = useRef<number | null>(null);
+	// coastal flow field for the particle background — rebuilt from the map
+	// canvas (land = opaque alpha) whenever the camera settles
+	const flowRef = useRef<FlowField | null>(null);
+	const flowLast = useRef(0);
+
+	const updateFlow = useCallback(() => {
+		const canvas = map.current?.getCanvas();
+		if (canvas) flowRef.current = computeFlowField(canvas);
+	}, []);
 
 	const startReticleAnimation = useCallback(() => {
 		if (reticleAnim.current) cancelAnimationFrame(reticleAnim.current);
@@ -304,6 +314,19 @@ export default function JourneyClient() {
 			center: [10, 45],
 			zoom: 1.6,
 			interactive: false,
+			preserveDrawingBuffer: true, // canvas must stay readable for the flow field
+		});
+
+		// rebuild the flow field when the map settles, throttled during flyTo
+		map.current.on("load", updateFlow);
+		map.current.once("idle", updateFlow);
+		map.current.on("moveend", updateFlow);
+		map.current.on("move", () => {
+			const now = performance.now();
+			if (now - flowLast.current > 250) {
+				flowLast.current = now;
+				updateFlow();
+			}
 		});
 
 		// Click handler for marker dots
@@ -333,8 +356,9 @@ export default function JourneyClient() {
 			if (reticleAnim.current) cancelAnimationFrame(reticleAnim.current);
 			map.current?.remove();
 			map.current = null;
+			flowRef.current = null;
 		};
-	}, [showLocationIndicator]);
+	}, [showLocationIndicator, updateFlow]);
 
 	// Auto-scroll to LIVE location on mount
 	useEffect(() => {
@@ -368,7 +392,7 @@ export default function JourneyClient() {
 		<div className="min-h-screen bg-dark flex flex-col">
 			{/* Fixed background — particle field behind, map (transparent water) on top */}
 			<div className="fixed inset-0 z-0 bg-[#050308]">
-				<HeroScene />
+				<HeroScene flow={flowRef} />
 				<div className="w-full h-full" ref={mapContainer} />
 			</div>
 
