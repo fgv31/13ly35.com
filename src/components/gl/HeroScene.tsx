@@ -34,7 +34,7 @@ const VERT = /* glsl */ `
 	attribute float aRnd;
 	attribute vec2 aVel;
 	attribute vec2 aState; // x: collision glow, y: life (0 = gone)
-	attribute vec2 aStar; // x: starlight whiteness, y: size multiplier
+	attribute vec3 aStar; // x: starlight whiteness, y: size, z: warmth
 	varying float vRnd;
 	varying float vCore;
 	varying float vSpeed;
@@ -42,13 +42,26 @@ const VERT = /* glsl */ `
 	varying float vGlow;
 	varying float vLife;
 	varying float vWhite;
+	varying float vWarm;
+	varying float vBlade;
 
 	void main() {
 		vRnd = aRnd;
 		vGlow = aState.x;
 		vLife = aState.y;
 		vWhite = aStar.x;
+		vWarm = aStar.z;
 		vec3 p = position;
+
+		// accretion-blade glow: stars flattened onto the horizontal plane
+		// through the cursor light up as one continuous line (reach 0.7 —
+		// keep in sync with DISC_REACH); a parked cursor (999) disables it.
+		// proportioned to the hole like Gargantua: ring ~2.5x the shadow,
+		// brightest at the hole, tapering into thin wisps at the tips
+		float bx = abs(p.x - uCursor.x) / 0.7;
+		float bladeX = pow(max(1.0 - bx, 0.0), 1.6);
+		float bladeY = 1.0 - smoothstep(0.03, 0.15, abs(p.y - uCursor.y));
+		vBlade = bladeX * bladeY;
 
 		// gentle idle drift so the field never reads as static
 		float ph = aRnd * 6.2831853;
@@ -58,7 +71,7 @@ const VERT = /* glsl */ `
 		// white-hot core only right at the void's edge (distance measured to
 		// the view ray through the cursor); farther out, original colors
 		float dist3 = length(cross(p - uCursor, uRayDir));
-		vCore = smoothstep(0.45, 0.2, dist3);
+		vCore = smoothstep(0.3, 0.13, dist3);
 
 		// motion in sprite space (sprite y runs down-screen, so flip world y)
 		vSpeed = length(aVel);
@@ -69,21 +82,23 @@ const VERT = /* glsl */ `
 
 		// screen-space event horizon: orbiters at other depths still project
 		// into the center, so the empty circle is enforced after projection
-		// (NDC radius 0.07 ≈ 32px at a 900px viewport)
+		// (NDC radius 0.047 ≈ 21px at a 900px viewport)
 		float aspect = projectionMatrix[1][1] / projectionMatrix[0][0];
 		vec2 ndc = gl_Position.xy / gl_Position.w;
 		vec2 dv = (ndc - uCursorNdc) * vec2(aspect, 1.0);
 		float rdd = length(dv);
-		if (rdd < 0.07) {
-			dv *= 0.07 / max(rdd, 1e-4);
+		if (rdd < 0.047) {
+			dv *= 0.047 / max(rdd, 1e-4);
 			gl_Position.xy = (uCursorNdc + dv / vec2(aspect, 1.0)) * gl_Position.w;
 		}
 
 		// the sprite canvas itself stretches with speed (multiplicative — MUST
 		// equal the fragment's stretch factor so the streak fills the sprite
 		// lengthwise at constant width, never clipped square)
-		gl_PointSize = uSize * uDpr * (300.0 / -mv.z) * aStar.y
-			* (1.0 + vCore * 1.4 + vGlow * 1.5)
+		// near-camera stars shrink — out-of-focus haze must not bury the scene
+		float nearFade = 1.0 - 0.55 * smoothstep(0.5, 3.0, p.z);
+		gl_PointSize = uSize * uDpr * (300.0 / -mv.z) * aStar.y * nearFade
+			* (1.0 + vCore * 0.8 + vGlow * 1.5 + vBlade * 0.3)
 			* (1.0 + min(vSpeed * 1.6, 4.0));
 	}
 `
@@ -99,6 +114,8 @@ const FRAG = /* glsl */ `
 	varying float vGlow;
 	varying float vLife;
 	varying float vWhite;
+	varying float vWarm;
+	varying float vBlade;
 
 	void main() {
 		if (vLife <= 0.01) discard; // burned up in a collision — respawning
@@ -122,31 +139,43 @@ const FRAG = /* glsl */ `
 		// two brightness tiers: ~1 in 9 dots shines, the rest stay subdued
 		col *= 0.5 + 0.65 * step(0.89, fract(vRnd * 7.0));
 		col = mix(col, uCyan, step(0.93, vRnd) * 0.7); // sparse cyan accents
-		// night sky: most dots lean toward pale starlight; a few warm giants
+		// night sky: most dots lean toward pale starlight; the galactic core
+		// and dust-cloud rims glow golden, plus a few lone warm giants
 		col = mix(col, vec3(0.88, 0.91, 1.0), vWhite);
-		col = mix(col, vec3(1.0, 0.78, 0.5), step(0.965, fract(vRnd * 13.0)) * 0.85);
-		// white is strictly a near-void property: dots at the rim burn white,
-		// and streaks only whiten while they are close — far away they keep
+		col = mix(col, vec3(1.0, 0.78, 0.5), max(vWarm, step(0.965, fract(vRnd * 13.0)) * 0.85));
+		// near-void glow is Gargantua white-gold: dots at the rim burn warm,
+		// and streaks brighten while they are close — far away they keep
 		// their original blue/violet
-		col = mix(col, vec3(1.0), vCore * 0.95);
-		col = mix(col, vec3(1.0), min(vSpeed * 0.6, 1.0) * vCore);
+		col = mix(col, vec3(1.0, 0.88, 0.66), vCore * 0.7);
+		col = mix(col, vec3(1.0, 0.96, 0.86), min(vSpeed * 0.45, 0.7) * vCore);
 		col = mix(col, vec3(1.0), vGlow); // collision flash
-		alpha = min(alpha * (1.0 + vGlow), 1.0);
+		// the accretion blade burns as one continuous golden-white line
+		col = mix(col, vec3(1.0, 0.9, 0.72), vBlade * 0.65);
+		alpha = min(alpha * (1.0 + vGlow + vBlade * 0.35), 1.0);
 		gl_FragColor = vec4(col, alpha);
 	}
 `
 
 // ─── Cursor gravity-well tuning ─────────────────────────────────────────────
-const INFLUENCE = 2.2 // gravity-well radius (world units, xy cylinder — full depth)
-const VOID = 0.19 // event-horizon radius: kept empty around the cursor — keep the shader clamp in sync
+const INFLUENCE = 1.7 // gravity-well radius (world units, view-ray cylinder — full depth)
+const CAM_Z = 6 // camera distance — anchors the depth-compensation factor
+const VOID = 0.127 // event-horizon radius: kept empty around the cursor — keep the shader clamp in sync
 const VOID_KICK = 40 // ejection acceleration inside the void
-const RING_STIFF = 4.5 // pull toward each particle's own orbit radius
-const ORBIT_MIN = 0.28 // tightest orbit radius — the "photon ring" just outside the void
-const ORBIT_SPAN = 0.9 // extra radius drawn from the particle's random seed
-const SWIRL = 2.2 // tangential kick — makes captured particles orbit
+const RING_STIFF = 3.2 // pull toward each particle's own target radius
+const RING_SHARE = 0.2 // fraction of captured stars destined for the photon ring; the rest form the disc
+const ORBIT_MIN = 0.18 // photon-ring radius — the round line hugging the shadow
+const ORBIT_SPAN = 0.05 // photon-ring thickness drawn from the particle's seed
+const SWIRL = 1.8 // tangential kick — makes ring particles circulate
+const DISC_R_IN = 0.19 // innermost disc orbit, just outside the shadow
+const DISC_R_OUT = 0.65 // outermost disc orbit — line span ~2.5x the hole, Gargantua proportions (shader blade glow reaches 0.7)
+const DISC_FLAT = 26.0 // squash toward the horizontal plane through the cursor — the disc reads as a thin line
+const DISC_SETTLE = 9.0 // vertical velocity damping for disc stars — kills the bounce across the plane
+const FAST_SHARE = 0.05 // stars keeping full speed; the rest move at SLOW_FACTOR
+const SLOW_FACTOR = 0.42 // terminal-speed multiplier for the lazy majority (orbital force stays full, so they still circulate)
+const DISC_SWIRL = 3.4 // circulation around the hole's vertical axis — fast enough to streak-fuse
 const SPRING = 2.6 // pull back to the home position
 const DAMPING = 3.0 // velocity decay per second
-const VMAX = 1.6 // speed cap (world units/s) — orbits stay smooth, nothing jumps
+const VMAX = 1.0 // speed cap (world units/s) — infall reads as a smooth dive, never a lunge
 
 // ─── Collision / burn-up tuning ─────────────────────────────────────────────
 const CELL = 0.06 // spatial-hash cell size for collision checks
@@ -170,8 +199,9 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 	const field = useMemo(() => {
 		const positions = new Float32Array(count * 3)
 		const rnd = new Float32Array(count)
-		// star look: x = whiteness (0 = nebula palette, 1 = starlight), y = size
-		const starAttr = new Float32Array(count * 2)
+		// star look: x = whiteness (0 = nebula palette, 1 = starlight),
+		// y = size, z = warmth (golden core / dust glow)
+		const starAttr = new Float32Array(count * 3)
 		// deterministic scatter — render must stay pure (no Math.random)
 		const hash = (n: number): number => {
 			const s = Math.sin(n * 127.1 + 311.7) * 43758.5453
@@ -180,55 +210,110 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 		// gaussian from two hashes (Box–Muller) — for galactic structure
 		const gauss = (a: number, b: number): number =>
 			Math.sqrt(-2 * Math.log(Math.max(hash(a), 1e-6))) * Math.cos(6.2831853 * hash(b))
-		// a handful of galaxy clusters, deterministically placed and elongated
-		const CLUSTERS = 6
+		// the sky's geometry: a diagonal galactic plane built from clumpy star
+		// clouds around a golden core, webbed with dark dust filaments — plus a
+		// faint even star field and a few tight open clusters
+		const CLUSTERS = 3
+		const BAND_SLOPE = 0.34
+		const CORE_X = 2.8 // galactic-core position along the band (world x)
+		// star clouds: pre-placed clumps hugging the band, denser near the core
+		const CLUMPS = 70
+		const clumps = new Float32Array(CLUMPS * 5) // cx, cy, cz, sigma, warmth
+		for (let c = 0; c < CLUMPS; c++) {
+			const s = hash(c * 53 + 23) < 0.55
+				? CORE_X + gauss(c * 57 + 29, c * 59 + 31) * SPREAD_X * 0.3
+				: (hash(c * 61 + 37) - 0.5) * 2.6 * SPREAD_X
+			const coreProx = Math.exp(-((s - CORE_X) * (s - CORE_X)) / 14)
+			clumps[c * 5 + 0] = s
+			clumps[c * 5 + 1] = s * BAND_SLOPE + gauss(c * 67 + 41, c * 71 + 43) * (0.4 + coreProx * 0.85)
+			clumps[c * 5 + 2] = (hash(c * 73 + 47) - 0.5) * 2 * SPREAD_Z * 0.7
+			clumps[c * 5 + 3] = 0.1 + hash(c * 79 + 53) * 0.3
+			clumps[c * 5 + 4] = coreProx * (0.35 + hash(c * 83 + 59) * 0.45)
+		}
+		// dark dust filaments — deterministic fractal noise over band coordinates
+		const dust = (s: number, p: number): number =>
+			0.5 +
+			0.5 *
+				(Math.sin(s * 1.3 + Math.sin(p * 3.1 + s * 0.7) * 1.5) * 0.55 +
+					Math.sin(s * 2.9 - p * 4.2 + 1.7) * 0.3 +
+					Math.sin((s - p) * 5.3 + 0.6) * 0.15)
 		for (let i = 0; i < count; i++) {
 			const kind = hash(i * 7 + 5)
 			let x: number
 			let y: number
 			let z = (hash(i * 4 + 2) - 0.5) * 2 * SPREAD_Z
 			let white: number
-			let size = 0.55 + hash(i * 7 + 6) * 0.75
-			if (kind < 0.5) {
-				// lone field stars — uniform sky
+			let warm = 0
+			// steep power law: a dust of faint pinpricks, rare bright stars
+			let size = 0.35 + Math.pow(hash(i * 7 + 6), 4.5) * 2.4
+			if (kind < 0.26) {
+				// lone field stars — half even sky, half thinning away from the plane
 				x = (hash(i * 4 + 0) - 0.5) * 2 * SPREAD_X
-				y = (hash(i * 4 + 1) - 0.5) * 2 * SPREAD_Y
-				white = 0.35 + hash(i * 7 + 1) * 0.45
-				// a few bright naked-eye stars in an otherwise faint field
-				size *= hash(i * 9 + 4) > 0.92 ? 1.7 : 0.75
-			} else if (kind < 0.78) {
-				// the milky way — a hazy diagonal band across the whole sky
-				x = (hash(i * 4 + 0) - 0.5) * 2.4 * SPREAD_X
-				y = x * 0.34 + gauss(i * 9 + 1, i * 9 + 2) * 0.85
-				white = 0.6 + hash(i * 7 + 2) * 0.4
-				size *= 0.6 // dense but fine dust
+				y = hash(i * 9 + 4) < 0.5
+					? (hash(i * 4 + 1) - 0.5) * 2 * SPREAD_Y
+					: x * BAND_SLOPE + gauss(i * 9 + 7, i * 9 + 8) * 2.4
+				white = 0.4 + hash(i * 7 + 1) * 0.45
+			} else if (kind < 0.93) {
+				// the milky way — mostly mottled clouds, the rest a diffuse haze
+				if (hash(i * 17 + 9) < 0.75) {
+					const c = Math.floor(hash(i * 11 + 3) * CLUMPS) * 5
+					const sig = clumps[c + 3]
+					x = clumps[c] + gauss(i * 13 + 1, i * 13 + 2) * sig * 1.6
+					y = clumps[c + 1] + gauss(i * 13 + 3, i * 13 + 4) * sig
+					z = clumps[c + 2] + gauss(i * 13 + 5, i * 13 + 6) * 0.25
+					warm = clumps[c + 4] * (0.5 + hash(i * 19 + 7) * 0.5)
+				} else {
+					x = hash(i * 9 + 5) < 0.5
+						? CORE_X + gauss(i * 9 + 1, i * 9 + 6) * SPREAD_X * 0.45
+						: (hash(i * 4 + 0) - 0.5) * 2.4 * SPREAD_X
+					const coreProx = Math.exp(-((x - CORE_X) * (x - CORE_X)) / 18)
+					y = x * BAND_SLOPE + gauss(i * 15 + 1, i * 15 + 2) * (0.55 + coreProx * 0.85)
+					warm = coreProx * 0.5 * hash(i * 19 + 7)
+				}
+				white = 0.55 + hash(i * 7 + 2) * 0.45
+				size *= 0.55
+				// dust lanes carve the band: dim, shrink and push aside
+				const p = y - x * BAND_SLOPE
+				if (Math.abs(p) < 1.7) {
+					const d = dust(x, p)
+					if (d > 0.62) {
+						size *= 0.4
+						white *= 0.5
+						warm *= 0.4
+						y += (d - 0.62) * (p > -0.1 ? 1.2 : -1.2)
+					}
+				}
+				// the golden bulge: bigger, warmer right at the core
+				const glow = Math.exp(-((x - CORE_X) * (x - CORE_X) + p * p * 4) / 10)
+				size *= 1 + glow * 0.5
+				warm = Math.min(1, warm + glow * 0.45)
 			} else {
-				// galaxy clusters — tight elliptical blobs
+				// tight open clusters — Pleiades-like knots
 				const c = Math.floor(hash(i * 11 + 3) * CLUSTERS)
-				const cx = (hash(c * 31 + 7) - 0.5) * 2 * SPREAD_X * 0.85
-				const cy = (hash(c * 37 + 11) - 0.5) * 2 * SPREAD_Y * 0.85
-				const cz = (hash(c * 41 + 13) - 0.5) * 2 * SPREAD_Z * 0.6
-				const ex = 0.25 + hash(c * 43 + 17) * 0.55
-				const ey = 0.2 + hash(c * 47 + 19) * 0.4
+				const cx = (hash(c * 31 + 7) - 0.5) * 2 * SPREAD_X * 0.9
+				const cy = (hash(c * 37 + 11) - 0.5) * 2 * SPREAD_Y * 0.9
+				const cz = (hash(c * 41 + 13) - 0.5) * 2 * SPREAD_Z * 0.5
+				const ex = 0.12 + hash(c * 43 + 17) * 0.2
 				x = cx + gauss(i * 13 + 1, i * 13 + 2) * ex
-				y = cy + gauss(i * 13 + 3, i * 13 + 4) * ey
-				z = cz + gauss(i * 13 + 5, i * 13 + 6) * 0.25
-				white = 0.3 + hash(i * 7 + 3) * 0.4
-				size *= 0.85
+				y = cy + gauss(i * 13 + 3, i * 13 + 4) * ex * 0.8
+				z = cz + gauss(i * 13 + 5, i * 13 + 6) * 0.15
+				white = 0.6 + hash(i * 7 + 3) * 0.4
+				size *= 0.8
 			}
 			positions[i * 3 + 0] = x
 			positions[i * 3 + 1] = y
 			positions[i * 3 + 2] = z
 			rnd[i] = hash(i * 4 + 3)
-			starAttr[i * 2 + 0] = white
-			starAttr[i * 2 + 1] = size
+			starAttr[i * 3 + 0] = white
+			starAttr[i * 3 + 1] = size
+			starAttr[i * 3 + 2] = warm
 		}
 		const g = new THREE.BufferGeometry()
 		const posAttr = new THREE.BufferAttribute(positions, 3)
 		posAttr.setUsage(THREE.DynamicDrawUsage)
 		g.setAttribute("position", posAttr)
 		g.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 1))
-		g.setAttribute("aStar", new THREE.BufferAttribute(starAttr, 2))
+		g.setAttribute("aStar", new THREE.BufferAttribute(starAttr, 3))
 		const velAttr = new THREE.BufferAttribute(new Float32Array(count * 2), 2)
 		velAttr.setUsage(THREE.DynamicDrawUsage)
 		g.setAttribute("aVel", velAttr)
@@ -237,10 +322,16 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 		const stateAttr = new THREE.BufferAttribute(state, 2)
 		stateAttr.setUsage(THREE.DynamicDrawUsage)
 		g.setAttribute("aState", stateAttr)
+		// speed classes: most stars orbit lazily, a few streak at full pace
+		const speeds = new Float32Array(count)
+		for (let i = 0; i < count; i++) {
+			speeds[i] = hash(i * 29 + 17) < FAST_SHARE ? 1 : SLOW_FACTOR
+		}
 		return {
 			geometry: g,
 			homes: positions.slice(),
 			rnds: rnd,
+			speeds,
 			// xyz offset + velocity per particle, integrated on the CPU each frame
 			offsets: new Float32Array(count * 3),
 			velocities: new Float32Array(count * 3),
@@ -263,7 +354,7 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 					uCursor: { value: new THREE.Vector3(999, 999, 0) },
 					uRayDir: { value: new THREE.Vector3(0, 0, -1) },
 					uCursorNdc: { value: new THREE.Vector2(9, 9) },
-					uSize: { value: 0.093 },
+					uSize: { value: 0.08 },
 					uDpr: { value: 1 },
 					uBlue: { value: BLUE },
 					uViolet: { value: VIOLET },
@@ -369,7 +460,7 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 		const dt = Math.min(delta, 0.05)
 		const decay = Math.exp(-DAMPING * dt)
 		const glowDecay = Math.exp(-GLOW_DECAY * dt)
-		const { homes, rnds, offsets, velocities, homeVels, phases, timers, grid } = f
+		const { homes, rnds, speeds, offsets, velocities, homeVels, phases, timers, grid } = f
 
 		// coastal flow: homes drift with the current sampled at their screen
 		// position — particles follow through their spring, so the streams stay
@@ -447,26 +538,63 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 			const ry = wy - uy * along
 			const rz = wz - uz * along
 			const dist = Math.sqrt(rx * rx + ry * ry + rz * rz)
+			// depth compensation: far stars get a stronger kick so their projected
+			// motion matches the near ones (which would otherwise dominate)
+			const db = (CAM_Z - pz) / CAM_Z
+			// Gargantua forms out of whatever the hole attracts: every captured
+			// star is destined for one of the two shapes — the photon ring (the
+			// round line hugging the shadow) or the edge-on accretion disc (the
+			// horizontal line). The disc builds up while the hole lingers and
+			// dissolves when it moves on — it is never drawn as its own object.
 			if (dist < INFLUENCE) {
 				const t01 = 1 - dist / INFLUENCE
-				const force = t01 * t01 * (3 - 2 * t01) // smoothstep falloff
-				const ring = ORBIT_MIN + rnds[i] * ORBIT_SPAN
+				const force = t01 * t01 * (3 - 2 * t01) * db // smoothstep falloff
+				// captured stars let go of home — otherwise the spring holds them
+				// short of their orbit and the disc smears into a fuzzy cloud
+				const rel = Math.min(force, 1) * 0.85
+				ax += ox * SPRING * rel
+				ay += oy * SPRING * rel
+				az += oz * SPRING * rel
 				const inv = 1 / Math.max(dist, 0.1)
 				const nx = rx * inv
 				const ny = ry * inv
 				const nz = rz * inv
-				const radial = -(dist - ring) * RING_STIFF * force
-				ax += nx * radial
-				ay += ny * radial
-				az += nz * radial
-				// swirl around the ray — a flat vortex facing the viewer
-				// (axis ⊥ n, so axis × n is already unit length)
-				const tx = uy * nz - uz * ny
-				const ty = uz * nx - ux * nz
-				const tz = ux * ny - uy * nx
-				ax += tx * SWIRL * force
-				ay += ty * SWIRL * force
-				az += tz * SWIRL * force
+				if (rnds[i] < RING_SHARE) {
+					// photon ring: a tight circle around the view ray, swirling
+					// face-on — always closed because it lives in screen space
+					const ring = ORBIT_MIN + (rnds[i] / RING_SHARE) * ORBIT_SPAN
+					const radial = -(dist - ring) * RING_STIFF * force
+					ax += nx * radial
+					ay += ny * radial
+					az += nz * radial
+					// swirl around the ray (axis ⊥ n, so axis × n is unit length).
+					// Orbital force stays at full strength — the per-star speed cap
+					// alone sets the pace, so slow stars still circulate rather than
+					// stalling and stacking on the near side.
+					const tx = uy * nz - uz * ny
+					const ty = uz * nx - ux * nz
+					const tz = ux * ny - uy * nx
+					ax += tx * SWIRL * force
+					ay += ty * SWIRL * force
+					az += tz * SWIRL * force
+				} else {
+					// accretion disc: flatten onto the horizontal plane through
+					// the cursor and orbit the hole's vertical axis at an assigned
+					// radius — sweeping in front and behind; the far side wraps
+					// the rim as a lensing arc. Settle damping bleeds vertical
+					// speed so stars stay concentrated on the line.
+					ay += (cy - py) * DISC_FLAT * force - vy * DISC_SETTLE * force
+					const ddx = px - cx
+					const ddz = pz
+					const rxz = Math.max(Math.hypot(ddx, ddz), 0.1)
+					const dr = (rnds[i] - RING_SHARE) / (1 - RING_SHARE)
+					const rt = DISC_R_IN + dr * (DISC_R_OUT - DISC_R_IN)
+					const radial = -(rxz - rt) * RING_STIFF * force
+					ax += (ddx / rxz) * radial
+					az += (ddz / rxz) * radial
+					ax += (-ddz / rxz) * DISC_SWIRL * force
+					az += (ddx / rxz) * DISC_SWIRL * force
+				}
 				// event horizon: nothing survives inside the void — eject hard
 				if (dist < VOID * 1.3) {
 					const eject = (VOID * 1.3 - dist) * VOID_KICK
@@ -478,10 +606,12 @@ function ParticleField(props: { count: number; flow?: FlowFieldRef }): React.JSX
 			vx = (vx + ax * dt) * decay
 			vy = (vy + ay * dt) * decay
 			vz = (vz + az * dt) * decay
-			// hard speed cap — fast approaches become smooth dives, never jumps
+			// hard per-star speed cap — fast approaches become smooth dives, never
+			// jumps; slow-class stars glide, the fast few streak
+			const vcap = VMAX * speeds[i]
 			const sp2 = vx * vx + vy * vy + vz * vz
-			if (sp2 > VMAX * VMAX) {
-				const s = VMAX / Math.sqrt(sp2)
+			if (sp2 > vcap * vcap) {
+				const s = vcap / Math.sqrt(sp2)
 				vx *= s
 				vy *= s
 				vz *= s
@@ -622,7 +752,7 @@ export default function HeroScene(props: { flow?: FlowFieldRef } = {}): React.JS
 	const tier = useQualityTier()
 	if (tier === "off") return null
 
-	const count = tier === "high" ? 6000 : 1500
+	const count = tier === "high" ? 44444 : 9000
 
 	return (
 		<SceneCanvas
